@@ -1,0 +1,103 @@
+{# Approve handhelds that ask to pair (see kidsplay_server.pairing). Included
+   from devices.html. Needs: pairing_enabled, pairing_waiting, pair_code,
+   pair_request (the request a QR link points at, or none), profiles, server_id.
+
+   Deliberately no list of waiting requests to click: any host on the network
+   can register a request under any name, so approving one must always start
+   from the code the parent reads off the handheld's own screen. #}
+<div class="card" id="pairing-card" style="margin-bottom:1.5rem;">
+  <h2>{% trans %}Pair a device{% endtrans %}</h2>
+  {% if not pairing_enabled %}
+  <p style="color:#666;">{% trans %}Pairing is turned off. Turn on "Allow pairing new devices" in <a href="/settings">Settings</a> to set up a handheld with a code.{% endtrans %}</p>
+  {% else %}
+  <p style="color:#666; font-size:0.88rem; margin-bottom:0.75rem;">{% trans %}A new handheld shows a code and a QR code. Scan the QR code, or type the code shown on the handheld's screen here, choose whose player it is and approve. Codes work for 10 minutes.{% endtrans %}</p>
+  <p style="color:#666; font-size:0.88rem; margin-bottom:0.75rem;" id="pair-server-id">{% trans id=server_id %}This server's ID is <strong>{{ id }}</strong>. The handheld shows the same ID below its code; if they differ, it is talking to a different server, so don't approve.{% endtrans %}</p>
+  <div id="pairing-result" class="hidden" style="margin-bottom:0.75rem;"></div>
+  {% if pair_request %}
+  <div class="alert alert-info" id="pair-details" style="margin-bottom:0.75rem;">
+    <strong>{% trans %}A device is asking to pair:{% endtrans %}</strong>
+    {{ pair_request.device_name or '—' }} · {{ pair_request.display_width }}×{{ pair_request.display_height }}<br>
+    {% trans %}The name is chosen by the device and is not proof of who it is. Check that the code below matches the one on your handheld's screen, then approve.{% endtrans %}
+  </div>
+  {% elif pair_code %}
+  <div class="alert alert-info" id="pair-details" style="margin-bottom:0.75rem;">
+    {% trans %}No device is waiting with that code. It may have expired; check the code on the handheld's screen.{% endtrans %}
+  </div>
+  {% endif %}
+  <div class="field-inline">
+    <div class="field">
+      <label for="pair-code">{% trans %}Code shown on the handheld's screen{% endtrans %}</label>
+      <input type="text" id="pair-code" value="{{ pair_code }}" maxlength="12" inputmode="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="{{ _('e.g. ABCD-2345') }}" style="font-family:monospace;">
+    </div>
+    <div class="field">
+      <label for="pair-profile">{% trans %}Profile{% endtrans %}</label>
+      <select id="pair-profile">
+        {% for p in profiles %}
+        <option value="{{ p.id }}">{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="pair-name">{% trans %}Device name{% endtrans %}</label>
+      <input type="text" id="pair-name" placeholder="{{ _('e.g. Leo\'s Player') }}">
+    </div>
+  </div>
+  <div class="field-inline" id="pair-actions">
+    <button class="btn btn-primary" onclick="approvePairing()"{% if not profiles %} disabled{% endif %}>{% trans %}Approve{% endtrans %}</button>
+    <button class="btn btn-danger" onclick="denyPairing()">{% trans %}Decline{% endtrans %}</button>
+  </div>
+  {% if not profiles %}
+  <p style="color:#888; font-size:0.85rem;">{% trans %}Create a profile first.{% endtrans %}</p>
+  {% endif %}
+  {% if pairing_waiting %}
+  <p style="color:#888; font-size:0.85rem; margin-top:0.75rem;">{% trans count=pairing_waiting %}{{ count }} device is waiting. Read its code off its screen and type it above.{% pluralize %}{{ count }} devices are waiting. Read the code off the screen of the one you are setting up and type it above.{% endtrans %}</p>
+  {% endif %}
+  {% endif %}
+</div>
+<script>
+const PT = {
+  needCode: {{ _('Enter the code shown on the handheld\'s screen.')|tojson }},
+  approved: {{ _('✓ Device paired: {name}. It will finish setting up by itself.')|tojson }},
+  error: {{ _('Error: {detail}')|tojson }},
+};
+
+function pairingMessage(cls, text) {
+  const box = document.getElementById('pairing-result');
+  box.className = cls;
+  box.textContent = text;
+}
+
+async function approvePairing() {
+  const code = document.getElementById('pair-code').value.trim();
+  if (!code) { pairingMessage('alert alert-error', PT.needCode); return; }
+  const resp = await fetch('/api/v1/pairing/approve', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      code: code,
+      profile_id: document.getElementById('pair-profile').value,
+      name: document.getElementById('pair-name').value.trim() || null,
+    }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (resp.ok) {
+    pairingMessage('alert alert-success', PT.approved.replace('{name}', data.name));
+    setTimeout(() => window.location.assign('/devices'), 1500);
+  } else {
+    pairingMessage('alert alert-error', PT.error.replace('{detail}', apiDetail(data, resp.statusText)));
+  }
+}
+
+async function denyPairing() {
+  const code = document.getElementById('pair-code').value.trim();
+  if (!code) { pairingMessage('alert alert-error', PT.needCode); return; }
+  const resp = await fetch('/api/v1/pairing/deny', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({code: code}),
+  });
+  if (resp.ok) { window.location.assign('/devices'); return; }
+  const data = await resp.json().catch(() => ({}));
+  pairingMessage('alert alert-error', PT.error.replace('{detail}', apiDetail(data, resp.statusText)));
+}
+</script>

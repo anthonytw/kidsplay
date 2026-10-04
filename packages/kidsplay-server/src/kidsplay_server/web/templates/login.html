@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Log in') }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:360px; margin:3rem auto;">
+  <h1>{{ _('Log in') }}</h1>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post" action="/login">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="field">
+      <label for="password">{{ _('Admin password') }}</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" required autofocus>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ _('Log in') }}</button>
+  </form>
+</div>
+{% endblock %}

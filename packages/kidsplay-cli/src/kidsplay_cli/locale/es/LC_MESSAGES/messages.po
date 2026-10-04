@@ -1,0 +1,192 @@
+# Spanish translations of Click's own messages (Usage:, Error: ..., --help).
+# Hand-maintained: Click has no Spanish catalog. Not extracted; see docs/TRANSLATING.md.
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-09-29 22:19+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: KidsPlay contributors\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "(dynamic)"
+msgstr "(dinámico)"
+
+msgid "Aborted!"
+msgstr "¡Cancelado!"
+
+#, python-brace-format
+msgid "Argument {name!r} takes {nargs} values."
+msgstr "El argumento {name!r} toma {nargs} valores."
+
+#, python-brace-format
+msgid ""
+"Choose from:\n"
+"\t{choices}"
+msgstr ""
+"Elige entre:\n"
+"\t{choices}"
+
+msgid "Commands"
+msgstr "Comandos"
+
+#, python-brace-format
+msgid "Could not open file {filename!r}: {message}"
+msgstr "No se pudo abrir el archivo {filename!r}: {message}"
+
+#, python-brace-format
+msgid "Did you mean {possibility}?"
+msgid_plural "(Possible options: {possibilities})"
+msgstr[0] "¿Quisiste decir {possibility}?"
+msgstr[1] "(Opciones posibles: {possibilities})"
+
+msgid "Error: The two entered values do not match."
+msgstr "Error: los dos valores ingresados no coinciden."
+
+msgid "Error: The value you entered was invalid."
+msgstr "Error: el valor que ingresaste no es válido."
+
+msgid "Error: invalid input"
+msgstr "Error: entrada no válida"
+
+#, python-brace-format
+msgid "Error: {e.message}"
+msgstr "Error: {e.message}"
+
+#, python-brace-format
+msgid "Error: {message}"
+msgstr "Error: {message}"
+
+#, python-brace-format
+msgid "Got unexpected extra argument ({args})"
+msgid_plural "Got unexpected extra arguments ({args})"
+msgstr[0] "Se recibió un argumento adicional inesperado ({args})"
+msgstr[1] "Se recibieron argumentos adicionales inesperados ({args})"
+
+#, python-brace-format
+msgid "Invalid value for {param_hint}: {message}"
+msgstr "Valor no válido para {param_hint}: {message}"
+
+#, python-brace-format
+msgid "Invalid value: {message}"
+msgstr "Valor no válido: {message}"
+
+msgid "Missing argument"
+msgstr "Falta el argumento"
+
+msgid "Missing command."
+msgstr "Falta el comando."
+
+msgid "Missing option"
+msgstr "Falta la opción"
+
+msgid "Missing parameter"
+msgstr "Falta el parámetro"
+
+#, python-brace-format
+msgid "Missing parameter: {param_name}"
+msgstr "Falta el parámetro: {param_name}"
+
+#, python-brace-format
+msgid "Missing {param_type}"
+msgstr "Falta {param_type}"
+
+#, python-brace-format
+msgid "No such command {name!r}."
+msgstr "No existe el comando {name!r}."
+
+#, python-brace-format
+msgid "No such option: {name}"
+msgstr "No existe la opción: {name}"
+
+#, python-brace-format
+msgid "Option {name!r} does not take a value."
+msgstr "La opción {name!r} no admite un valor."
+
+#, python-brace-format
+msgid "Option {name!r} requires an argument."
+msgid_plural "Option {name!r} requires {nargs} arguments."
+msgstr[0] "La opción {name!r} requiere un argumento."
+msgstr[1] "La opción {name!r} requiere {nargs} argumentos."
+
+msgid "Options"
+msgstr "Opciones"
+
+msgid "Repeat for confirmation"
+msgstr "Repite para confirmar"
+
+msgid "Show this message and exit."
+msgstr "Muestra este mensaje y sale."
+
+#, python-brace-format
+msgid "Takes {nargs} values but 1 was given."
+msgid_plural "Takes {nargs} values but {len} were given."
+msgstr[0] "Toma {nargs} valores, pero se dio 1."
+msgstr[1] "Toma {nargs} valores, pero se dieron {len}."
+
+#, python-brace-format
+msgid "Try '{command} {option}' for help."
+msgstr "Prueba '{command} {option}' para obtener ayuda."
+
+msgid "Usage:"
+msgstr "Uso:"
+
+#, python-brace-format
+msgid "default: {default}"
+msgstr "predeterminado: {default}"
+
+#, python-brace-format
+msgid "env var: {var}"
+msgstr "variable de entorno: {var}"
+
+msgid "unknown error"
+msgstr "error desconocido"
+
+#, python-brace-format
+msgid "{name} {filename!r} does not exist."
+msgstr "{name} {filename!r} no existe."
+
+#, python-brace-format
+msgid "{name} {filename!r} is a directory."
+msgstr "{name} {filename!r} es un directorio."
+
+#, python-brace-format
+msgid "{name} {filename!r} is a file."
+msgstr "{name} {filename!r} es un archivo."
+
+#, python-brace-format
+msgid "{name} {filename!r} is not readable."
+msgstr "{name} {filename!r} no se puede leer."
+
+#, python-brace-format
+msgid "{name} {filename!r} is not writable."
+msgstr "{name} {filename!r} no se puede escribir."
+
+#, python-brace-format
+msgid "{value!r} is not a valid UUID."
+msgstr "{value!r} no es un UUID válido."
+
+#, python-brace-format
+msgid "{value!r} is not a valid boolean. Recognized values: {states}"
+msgstr "{value!r} no es un booleano válido. Valores reconocidos: {states}"
+
+#, python-brace-format
+msgid "{value!r} is not a valid {number_type}."
+msgstr "{value!r} no es un {number_type} válido."
+
+#, python-brace-format
+msgid "{value!r} is not {choice}."
+msgid_plural "{value!r} is not one of {choices}."
+msgstr[0] "{value!r} no es {choice}."
+msgstr[1] "{value!r} no es ninguno de {choices}."
+
+#, python-brace-format
+msgid "{value} is not in the range {range}."
+msgstr "{value} no está en el rango {range}."
+

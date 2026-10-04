@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Dashboard') }}{% endblock %}
+
+{% block content %}
+<h1>{{ _('Dashboard') }}</h1>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ music_count }}</div>
+    <div class="stat-label">{{ _('Music tracks') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ audiobook_count }}</div>
+    <div class="stat-label">{{ _('Audiobook chapters') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ photo_count }}</div>
+    <div class="stat-label">{{ _('Photos') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ profile_count }}</div>
+    <div class="stat-label">{{ _('Profiles') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ device_count }}</div>
+    <div class="stat-label">{{ _('Devices') }}</div>
+  </div>
+</div>
+
+<div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+  <a href="/media" class="btn btn-primary">{{ _('Browse Media') }}</a>
+  <a href="/media/import" class="btn btn-primary">{{ _('Import Media') }}</a>
+  <a href="/profiles" class="btn btn-secondary">{{ _('Profiles') }}</a>
+  <a href="/devices" class="btn btn-secondary">{{ _('Devices') }}</a>
+  <a href="/docs" class="btn btn-secondary">{{ _('API Docs') }}</a>
+</div>
+{% endblock %}

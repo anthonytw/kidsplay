@@ -1,0 +1,913 @@
+{% extends "base.html" %}
+{% block title %} — {% trans %}Media{% endtrans %}{% endblock %}
+
+{% block content %}
+<style>
+  .media-group {
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    background: #fff;
+  }
+  .media-group summary {
+    padding: 0.55rem 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+    background: #f7f7fa;
+    list-style: none;
+    border-bottom: 1px solid transparent;
+  }
+  .media-group summary::-webkit-details-marker { display: none; }
+  .media-group[open] summary { border-bottom-color: #e5e5ec; }
+  .media-group-arrow {
+    font-size: 0.6rem;
+    color: #999;
+    display: inline-block;
+    transition: transform 150ms;
+    flex-shrink: 0;
+  }
+  .media-group[open] .media-group-arrow { transform: rotate(90deg); }
+  .media-group-name { font-weight: 600; font-size: 0.88rem; }
+  .media-group-count { font-size: 0.76rem; color: #888; margin-left: auto; flex-shrink: 0; }
+  .media-group table { border-radius: 0; box-shadow: none; }
+
+  tr.media-row { cursor: pointer; }
+  @media (max-width: 600px) {
+    /* Card header on one line: select box, thumbnail, title. */
+    table.stack tbody tr.media-row { display: grid; grid-template-columns: 44px 46px 1fr; column-gap: 0.4rem; align-items: center; }
+    table.stack tr.media-row > td { grid-column: 1 / -1; }
+    table.stack tr.media-row > td:nth-child(1), table.stack tr.media-row > td:nth-child(2) { grid-column: auto; border-bottom: none; padding: 0.35rem 0; }
+    table.stack tr.media-row > td:nth-child(3) { grid-column: auto; border-bottom: none; font-size: 1rem; }
+    table.stack thead th.col-select { width: auto !important; text-align: left !important; }
+  }
+  tr.media-row:hover td { background: #f0f0f8; }
+  tr.media-row.row-selected td { background: #e8e8f8; }
+  tr.media-row.row-selected:hover td { background: #ddddf5; }
+
+  /* Bulk action bar */
+  #bulk-bar {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #1e2330;
+    border-top: 1px solid #3a3f50;
+    padding: 0.65rem 1.5rem;
+    z-index: 200;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  }
+  #bulk-bar .bulk-sep {
+    width: 1px; height: 22px; background: #3a3f50; flex-shrink: 0;
+  }
+  #bulk-bar label { font-size: 0.82rem; color: #aaa; white-space: nowrap; }
+  #bulk-bar input[type=text] {
+    width: 140px; padding: 0.28rem 0.5rem; font-size: 0.85rem;
+  }
+  #bulk-bar select {
+    padding: 0.28rem 0.5rem; font-size: 0.85rem;
+  }
+  #bulk-error { color: #f87171; font-size: 0.82rem; }
+
+  /* View modal */
+  #view-modal {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1e2330;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 0;
+    width: min(560px, 95vw);
+    z-index: 101;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+  #view-modal-header {
+    display: flex;
+    gap: 1.1rem;
+    padding: 1.25rem 1.25rem 1rem;
+    align-items: flex-start;
+  }
+  #view-thumb-wrap {
+    flex-shrink: 0;
+    width: 120px; height: 120px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #2a2f3e;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #view-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  #view-thumb-wrap .no-thumb { color: #555; font-size: 2.5rem; }
+  #view-info { flex: 1; min-width: 0; }
+  #view-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.25rem; line-height: 1.3; }
+  #view-artist { font-size: 0.88rem; color: #aaa; margin: 0 0 0.2rem; }
+  #view-playlist { font-size: 0.82rem; color: #888; margin: 0 0 0.5rem; }
+  #view-loudness { font-size: 0.8rem; color: #888; margin: 0 0 0.5rem; }
+  #view-meta { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+  #view-player-wrap {
+    padding: 0 1.25rem 1rem;
+  }
+  #view-player {
+    width: 100%;
+    height: 36px;
+    border-radius: 4px;
+    outline: none;
+  }
+  #view-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #2a2f3e;
+  }
+</style>
+
+<div class="page-header">
+  <h1>{% trans %}Media Library{% endtrans %}</h1>
+  <div style="display:flex; gap:0.5rem; align-items:center;">
+    <span id="normalize-status" style="font-size:0.85rem; color:#888;"></span>
+    <button id="normalize-btn" class="btn btn-secondary" onclick="startNormalize()"
+            title="{{ _('Bring every song and audiobook to the loudness target. Items already at the target are skipped.') }}">{% trans %}Normalize loudness{% endtrans %}</button>
+    <a href="/media/import" class="btn btn-primary">{% trans %}Import{% endtrans %}</a>
+  </div>
+</div>
+
+<form method="get" action="/media" class="card" style="margin-bottom:1rem;">
+  <div class="field-inline">
+    <div style="flex:0 0 auto;">
+      <label>{% trans %}Type{% endtrans %}</label>
+      <select name="media_type" style="width:130px;">
+        <option value="">{% trans %}All types{% endtrans %}</option>
+        <option value="music" {% if media_type == 'music' %}selected{% endif %}>{% trans %}Music{% endtrans %}</option>
+        <option value="audiobook" {% if media_type == 'audiobook' %}selected{% endif %}>{% trans %}Audiobooks{% endtrans %}</option>
+        <option value="photo" {% if media_type == 'photo' %}selected{% endif %}>{% trans %}Photos{% endtrans %}</option>
+      </select>
+    </div>
+    <div style="flex:0 0 auto;">
+      <label>{% trans %}Profile{% endtrans %}</label>
+      <select name="profile_id" style="width:150px;">
+        <option value="">{% trans %}All profiles{% endtrans %}</option>
+        {% for p in profiles %}
+        <option value="{{ p.id }}" {% if profile_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex:0 0 auto;">
+      <label>{% trans %}Group by{% endtrans %}</label>
+      <select name="group_by" style="width:120px;">
+        <option value="playlist" {% if group_by == 'playlist' %}selected{% endif %}>{% trans %}Playlist{% endtrans %}</option>
+        <option value="artist" {% if group_by == 'artist' %}selected{% endif %}>{% trans %}Artist{% endtrans %}</option>
+        <option value="none" {% if group_by == 'none' %}selected{% endif %}>{% trans %}None{% endtrans %}</option>
+      </select>
+    </div>
+    <div style="flex:1; min-width:180px;">
+      <label>{% trans %}Search{% endtrans %}</label>
+      <input type="text" name="q" value="{{ q }}" placeholder="{{ _('title, artist, playlist…') }}">
+    </div>
+    <div style="align-self:flex-end; display:flex; gap:0.4rem;">
+      <button type="submit" class="btn btn-primary">{% trans %}Filter{% endtrans %}</button>
+      {% if media_type or profile_id or q %}
+      <a href="/media?group_by={{ group_by }}" class="btn btn-secondary">{% trans %}Clear{% endtrans %}</a>
+      {% endif %}
+    </div>
+  </div>
+</form>
+
+{# Autocomplete data lists #}
+<datalist id="artist-list">
+  {% for a in distinct_artists %}<option value="{{ a }}">{% endfor %}
+</datalist>
+<datalist id="playlist-list">
+  {% for p in distinct_playlists %}<option value="{{ p }}">{% endfor %}
+</datalist>
+
+{# All profiles as JSON for the edit modal #}
+<script>
+const ALL_PROFILES = {{ profiles | tojson }};
+</script>
+
+{# ── Grouped view ── #}
+{% if group_by != 'none' %}
+  {% if group_by == 'artist' %}{% set _gattr = 'artist' %}{% else %}{% set _gattr = 'playlist_title' %}{% endif %}
+  {% set groups = media_items | groupby(_gattr) | list %}
+  {% if groups %}
+    {% for group_key, group_items in groups %}
+    {% set item_list = group_items | list %}
+    <details class="media-group">
+      <summary>
+        <span class="media-group-arrow">&#9658;</span>
+        <span class="media-group-name">{{ group_key if group_key else _('(Unknown)') }}</span>
+        <span class="media-group-count">{% trans count=item_list | length %}{{ count }} item{% pluralize %}{{ count }} items{% endtrans %}</span>
+      </summary>
+      <table class="stack">
+        <thead>
+          <tr>
+            <th class="col-select" data-nolabel style="width:28px; padding:0.4rem 0.3rem; text-align:center;">
+              <label class="check-hit"><input type="checkbox" class="group-select-all" onchange="toggleGroupSelect(this)" title="{{ _('Select group') }}"><span class="check-hit-text">{{ _('Select group') }}</span></label>
+            </th>
+            <th style="width:46px;"></th>
+            <th data-nolabel>{% trans %}Title{% endtrans %}</th>
+            <th>{% trans %}Type{% endtrans %}</th>
+            <th>{% if group_by == 'artist' %}{% trans %}Playlist / Group{% endtrans %}{% else %}{% trans %}Artist{% endtrans %}{% endif %}</th>
+            <th>{% trans %}Profiles{% endtrans %}</th>
+            <th>{% trans %}Status{% endtrans %}</th>
+            <th style="width:70px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for item in item_list %}
+          <tr id="row-{{ item.id }}" class="media-row"
+              data-title="{{ item.title | e }}"
+              data-artist="{{ item.artist | e }}"
+              data-playlist="{{ item.playlist_title | e }}"
+              data-type="{{ item.media_type }}"
+              data-type-label="{{ item.media_type|media_type_label }}"
+              data-status="{{ item.processing_status }}"
+              data-status-label="{{ item.processing_status|processing_status_label }}"
+              data-profiles="{{ item.profiles | tojson | forceescape }}"
+              data-profile-ids="{{ item.profile_ids | tojson | forceescape }}"
+              data-thumb="{{ item.thumbnail_hash or '' }}"
+              data-large-thumb="{{ item.large_thumbnail_hash or '' }}"
+              data-audio="{{ item.audio_hash or '' }}"
+              data-loudness="{{ item.loudness | e }}"
+        data-normalizing="{{ '1' if item.normalizing else '' }}"
+              data-normalizing="{{ '1' if item.normalizing else '' }}"
+              onclick="openView(event, '{{ item.id }}')">
+            <td style="text-align:center; padding:0.3rem;" onclick="event.stopPropagation()">
+              <label class="check-hit"><input type="checkbox" class="row-checkbox" value="{{ item.id }}"
+                     onchange="toggleRowSelect('{{ item.id }}', this.checked)" title="{{ _('Select') }}"></label>
+            </td>
+            <td>
+              {% if item.thumbnail_hash %}
+              <img class="thumb" src="/web/media-file/{{ item.thumbnail_hash }}" alt="">
+              {% else %}
+              <span class="thumb-placeholder"></span>
+              {% endif %}
+            </td>
+            <td>
+              <strong>{{ item.title }}</strong>
+            </td>
+            <td><span class="tag">{{ item.media_type|media_type_label }}</span></td>
+            <td>
+              {% if group_by == 'artist' %}
+                {{ item.playlist_title }}
+              {% else %}
+                {% if item.artist %}<span style="color:#666; font-size:0.85rem;">{{ item.artist }}</span>{% else %}<span style="color:#bbb; font-size:0.85rem;">—</span>{% endif %}
+              {% endif %}
+            </td>
+            <td>
+              {% for p in item.profiles %}
+              <span class="tag">{{ p }}</span>
+              {% endfor %}
+            </td>
+            <td>
+              <span class="tag {% if item.processing_status == 'ready' %}tag-ready{% elif item.processing_status == 'failed' %}tag-failed{% elif item.processing_status == 'processing' %}tag-processing{% endif %}">
+                {{ item.processing_status|processing_status_label }}
+              </span>
+              {% if item.normalizing %}<span class="tag tag-processing normalizing-tag">{% trans %}Normalizing…{% endtrans %}</span>{% endif %}
+            </td>
+            <td class="actions" style="white-space:nowrap;" onclick="event.stopPropagation()">
+              <button class="btn btn-secondary btn-sm" onclick="openEdit('{{ item.id }}')">{% trans %}Edit{% endtrans %}</button>
+              <button class="btn btn-danger btn-sm"
+                hx-delete="/api/v1/media/{{ item.id }}"
+                hx-confirm="{% trans name=item.title %}Delete '{{ name }}'?{% endtrans %}"
+                hx-target="#row-{{ item.id }}"
+                hx-swap="outerHTML">{% trans %}Delete{% endtrans %}</button>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </details>
+    {% endfor %}
+  {% else %}
+    <p style="text-align:center; color:#888; padding:2rem;">
+      {% trans %}No media found.{% endtrans %}
+      {% if not (media_type or profile_id or q) %}
+      <a href="/media/import">{% trans %}Import some{% endtrans %}</a>.
+      {% endif %}
+    </p>
+  {% endif %}
+
+{# ── Flat view ── #}
+{% else %}
+<table class="stack">
+  <thead>
+    <tr>
+      <th class="col-select" data-nolabel style="width:28px; padding:0.4rem 0.3rem; text-align:center;">
+        <label class="check-hit"><input type="checkbox" id="select-all-flat" onchange="toggleSelectAllFlat(this)" title="{{ _('Select all') }}"><span class="check-hit-text">{{ _('Select all') }}</span></label>
+      </th>
+      <th style="width:46px;"></th>
+      <th data-nolabel>{% trans %}Title{% endtrans %}</th>
+      <th>{% trans %}Type{% endtrans %}</th>
+      <th>{% trans %}Playlist / Group{% endtrans %}</th>
+      <th>{% trans %}Profiles{% endtrans %}</th>
+      <th>{% trans %}Status{% endtrans %}</th>
+      <th style="width:70px;"></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for item in media_items %}
+    <tr id="row-{{ item.id }}" class="media-row"
+        data-title="{{ item.title | e }}"
+        data-artist="{{ item.artist | e }}"
+        data-playlist="{{ item.playlist_title | e }}"
+        data-type="{{ item.media_type }}"
+        data-type-label="{{ item.media_type|media_type_label }}"
+        data-status="{{ item.processing_status }}"
+        data-status-label="{{ item.processing_status|processing_status_label }}"
+        data-profiles="{{ item.profiles | tojson | forceescape }}"
+        data-profile-ids="{{ item.profile_ids | tojson | forceescape }}"
+        data-thumb="{{ item.thumbnail_hash or '' }}"
+        data-large-thumb="{{ item.large_thumbnail_hash or '' }}"
+        data-audio="{{ item.audio_hash or '' }}"
+        data-loudness="{{ item.loudness | e }}"
+        onclick="openView(event, '{{ item.id }}')">
+      <td style="text-align:center; padding:0.3rem;" onclick="event.stopPropagation()">
+        <label class="check-hit"><input type="checkbox" class="row-checkbox" value="{{ item.id }}"
+               onchange="toggleRowSelect('{{ item.id }}', this.checked)" title="{{ _('Select') }}"></label>
+      </td>
+      <td>
+        {% if item.thumbnail_hash %}
+        <img class="thumb" src="/web/media-file/{{ item.thumbnail_hash }}" alt="">
+        {% else %}
+        <span class="thumb-placeholder"></span>
+        {% endif %}
+      </td>
+      <td>
+        <strong>{{ item.title }}</strong>
+        {% if item.artist %}<span style="display:block;flex-basis:100%;color:#888;font-size:0.8rem;">{{ item.artist }}</span>{% endif %}
+      </td>
+      <td><span class="tag">{{ item.media_type|media_type_label }}</span></td>
+      <td>{{ item.playlist_title }}</td>
+      <td>
+        {% for p in item.profiles %}
+        <span class="tag">{{ p }}</span>
+        {% endfor %}
+      </td>
+      <td>
+        <span class="tag {% if item.processing_status == 'ready' %}tag-ready{% elif item.processing_status == 'failed' %}tag-failed{% elif item.processing_status == 'processing' %}tag-processing{% endif %}">
+          {{ item.processing_status|processing_status_label }}
+        </span>
+        {% if item.normalizing %}<span class="tag tag-processing normalizing-tag">{% trans %}Normalizing…{% endtrans %}</span>{% endif %}
+      </td>
+      <td class="actions" style="white-space:nowrap;" onclick="event.stopPropagation()">
+        <button class="btn btn-secondary btn-sm" onclick="openEdit('{{ item.id }}')">{% trans %}Edit{% endtrans %}</button>
+        <button class="btn btn-danger btn-sm"
+          hx-delete="/api/v1/media/{{ item.id }}"
+          hx-confirm="{% trans name=item.title %}Delete '{{ name }}'?{% endtrans %}"
+          hx-target="#row-{{ item.id }}"
+          hx-swap="outerHTML">{% trans %}Delete{% endtrans %}</button>
+      </td>
+    </tr>
+  {% else %}
+    <tr>
+      <td colspan="8" style="text-align:center; color:#888; padding:2rem;">
+        {% trans %}No media found.{% endtrans %}
+        {% if not (media_type or profile_id or q) %}
+        <a href="/media/import">{% trans %}Import some{% endtrans %}</a>.
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<p style="margin-top:0.75rem; color:#888; font-size:0.8rem;">
+  {% trans count=media_items | length %}Showing {{ count }} item.{% pluralize %}Showing {{ count }} items.{% endtrans %}
+</p>
+
+{# ── Bulk action bar ── #}
+<div id="bulk-bar">
+  <span id="bulk-count" style="font-weight:600; color:#fff; white-space:nowrap;"></span>
+  <button class="btn btn-secondary btn-sm" onclick="clearSelection()">{% trans %}Clear{% endtrans %}</button>
+
+  <div class="bulk-sep"></div>
+
+  <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+    <label>{% trans %}Profiles:{% endtrans %}</label>
+    <select id="bulk-profile-select">
+      <option value="__all__">{% trans %}All profiles{% endtrans %}</option>
+      {% for p in profiles %}
+      <option value="{{ p.id }}">{{ p.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-secondary btn-sm" onclick="bulkAddProfile()">{% trans %}Add{% endtrans %}</button>
+    <button class="btn btn-secondary btn-sm" onclick="bulkRemoveProfile()">{% trans %}Remove{% endtrans %}</button>
+  </div>
+
+  <div class="bulk-sep"></div>
+
+  <div style="display:flex; align-items:center; gap:0.4rem;">
+    <input type="text" id="bulk-artist" list="artist-list" placeholder="{{ _('Artist…') }}">
+    <button class="btn btn-secondary btn-sm" onclick="bulkSetArtist()">{% trans %}Set Artist{% endtrans %}</button>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:0.4rem;">
+    <input type="text" id="bulk-playlist" list="playlist-list" placeholder="{{ _('Playlist…') }}">
+    <button class="btn btn-secondary btn-sm" onclick="bulkSetPlaylist()">{% trans %}Set Playlist{% endtrans %}</button>
+  </div>
+
+  <span id="bulk-error" style="display:none;"></span>
+</div>
+
+{# ── View / play modal ── #}
+<div id="view-modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:100;" onclick="closeView()"></div>
+<div id="view-modal">
+  <div id="view-modal-header">
+    <div id="view-thumb-wrap">
+      <img id="view-thumb-img" src="" alt="" style="display:none;">
+      <span id="view-thumb-icon" class="no-thumb">&#9835;</span>
+    </div>
+    <div id="view-info">
+      <p id="view-title"></p>
+      <p id="view-artist"></p>
+      <p id="view-playlist"></p>
+      <p id="view-loudness"></p>
+      <div id="view-meta"></div>
+    </div>
+  </div>
+  <div id="view-player-wrap" style="display:none;">
+    <audio id="view-player" controls preload="none"></audio>
+  </div>
+  <div id="view-modal-footer">
+    <button class="btn btn-secondary btn-sm" onclick="openEdit(_viewCurrentId); closeView()">{% trans %}Edit{% endtrans %}</button>
+    <button class="btn btn-secondary" onclick="closeView()">{% trans %}Close{% endtrans %}</button>
+  </div>
+</div>
+
+{# ── Edit modal ── #}
+<div id="edit-modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:100;" onclick="closeEdit()"></div>
+<div id="edit-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+     background:#1e2330; border:1px solid #333; border-radius:8px; padding:1.5rem; width:min(500px,95vw);
+     z-index:101; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+  <h3 style="margin:0 0 1rem;">{% trans %}Edit Media{% endtrans %}</h3>
+  <input type="hidden" id="modal-id">
+
+  <div style="display:grid; gap:0.75rem;">
+    <div>
+      <label style="display:block; margin-bottom:0.25rem; font-size:0.85rem; color:#aaa;">{% trans %}Title *{% endtrans %}</label>
+      <input type="text" id="modal-title" style="width:100%; box-sizing:border-box;">
+    </div>
+    <div>
+      <label style="display:block; margin-bottom:0.25rem; font-size:0.85rem; color:#aaa;">{% trans %}Artist{% endtrans %}</label>
+      <input type="text" id="modal-artist" list="artist-list" style="width:100%; box-sizing:border-box;" placeholder="{{ _('optional') }}">
+    </div>
+    <div>
+      <label style="display:block; margin-bottom:0.25rem; font-size:0.85rem; color:#aaa;">{% trans %}Playlist / Group *{% endtrans %}</label>
+      <input type="text" id="modal-playlist" list="playlist-list" style="width:100%; box-sizing:border-box;">
+    </div>
+    <div>
+      <label style="display:block; margin-bottom:0.25rem; font-size:0.85rem; color:#aaa;">{% trans %}Type *{% endtrans %}</label>
+      <select id="modal-type" style="width:100%;">
+        <option value="music">{% trans %}Music{% endtrans %}</option>
+        <option value="audiobook">{% trans %}Audiobook{% endtrans %}</option>
+        <option value="photo">{% trans %}Photo{% endtrans %}</option>
+      </select>
+    </div>
+    <div>
+      <label style="display:block; margin-bottom:0.5rem; font-size:0.85rem; color:#aaa;">{% trans %}Profiles{% endtrans %}</label>
+      <div id="modal-profiles" style="display:flex; flex-wrap:wrap; gap:0.5rem;"></div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:0.5rem; margin-top:1.25rem; justify-content:flex-end;">
+    <button class="btn btn-secondary" onclick="closeEdit()">{% trans %}Cancel{% endtrans %}</button>
+    <button class="btn btn-primary" onclick="saveEdit()">{% trans %}Save{% endtrans %}</button>
+  </div>
+  <div id="modal-error" style="color:#f87171; font-size:0.85rem; margin-top:0.5rem; display:none;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Multi-select & bulk actions ─────────────────────────────────────────────
+const MSG_SELECTED = {{ _('{n} selected')|tojson }};
+const MSG_ADD_FAILED = {{ _('Add failed: {detail}')|tojson }};
+const MSG_REMOVE_FAILED = {{ _('Remove failed: {detail}')|tojson }};
+const MSG_SET_ARTIST_FAILED = {{ _('Set artist failed: {detail}')|tojson }};
+const MSG_SET_PLAYLIST_FAILED = {{ _('Set playlist failed: {detail}')|tojson }};
+const MSG_NETWORK_ERROR = {{ _('Network error: {error}')|tojson }};
+const MSG_PLAYLIST_REQUIRED = {{ _('Playlist name is required.')|tojson }};
+const MSG_TITLE_PLAYLIST_REQUIRED = {{ _('Title and playlist are required.')|tojson }};
+const MSG_SAVE_FAILED = {{ _('Save failed: {detail}')|tojson }};
+const MSG_ASSIGN_FAILED = {{ _('Profile assign failed: {detail}')|tojson }};
+const MSG_UNASSIGN_FAILED = {{ _('Profile unassign failed: {detail}')|tojson }};
+const MSG_NO_PROFILES = {{ _('No profiles defined')|tojson }};
+const MSG_NORMALIZING = {{ _('Normalizing… {done}/{total}')|tojson }};
+const MSG_NORM_NORMALIZED = {{ _('Normalized {n}')|tojson }};
+const MSG_NORM_SKIPPED = {{ _('skipped {n}')|tojson }};
+const MSG_NORM_UNCHANGED = {{ _('unchanged {n}')|tojson }};
+const MSG_NORM_FAILED = {{ _('failed {n}')|tojson }};
+const MSG_NORMALIZE_FAILED = {{ _('Normalize failed: {detail}')|tojson }};
+const selectedIds = new Set();
+
+function toggleRowSelect(id, checked) {
+  if (checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  const row = document.getElementById('row-' + id);
+  if (row) row.classList.toggle('row-selected', checked);
+  updateBulkBar();
+}
+
+function toggleSelectAllFlat(cb) {
+  document.querySelectorAll('.row-checkbox').forEach(box => {
+    box.checked = cb.checked;
+    toggleRowSelect(box.value, cb.checked);
+  });
+}
+
+function toggleGroupSelect(cb) {
+  // Select all checkboxes within the same <table> as this header checkbox
+  const table = cb.closest('table');
+  table.querySelectorAll('.row-checkbox').forEach(box => {
+    box.checked = cb.checked;
+    toggleRowSelect(box.value, cb.checked);
+  });
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  document.querySelectorAll('.row-checkbox').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('.group-select-all').forEach(cb => { cb.checked = false; });
+  const flat = document.getElementById('select-all-flat');
+  if (flat) flat.checked = false;
+  document.querySelectorAll('.media-row.row-selected').forEach(r => r.classList.remove('row-selected'));
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const n = selectedIds.size;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  document.getElementById('bulk-count').textContent = MSG_SELECTED.replace('{n}', n);
+  document.getElementById('bulk-error').style.display = 'none';
+}
+
+function showBulkError(msg) {
+  const el = document.getElementById('bulk-error');
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+async function bulkAddProfile() {
+  const profileId = document.getElementById('bulk-profile-select').value;
+  const ids = Array.from(selectedIds);
+  try {
+    if (profileId === '__all__') {
+      for (const p of ALL_PROFILES) {
+        const r = await fetch('/api/v1/media/assign-batch', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({profile_id: p.id, media_ids: ids}),
+        });
+        if (!r.ok) { const detail = apiDetail(await r.json().catch(() => ({})), r.statusText); showBulkError(MSG_ADD_FAILED.replace('{detail}', () => detail)); return; }
+      }
+    } else {
+      const r = await fetch('/api/v1/media/assign-batch', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({profile_id: profileId, media_ids: ids}),
+      });
+      if (!r.ok) { const detail = apiDetail(await r.json().catch(() => ({})), r.statusText); showBulkError(MSG_ADD_FAILED.replace('{detail}', () => detail)); return; }
+    }
+    location.reload();
+  } catch(e) { showBulkError(MSG_NETWORK_ERROR.replace('{error}', () => e)); }
+}
+
+async function bulkRemoveProfile() {
+  const profileId = document.getElementById('bulk-profile-select').value;
+  const ids = Array.from(selectedIds);
+  try {
+    if (profileId === '__all__') {
+      for (const p of ALL_PROFILES) {
+        const r = await fetch('/api/v1/media/unassign-batch', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({profile_id: p.id, media_ids: ids}),
+        });
+        if (!r.ok) { const detail = apiDetail(await r.json().catch(() => ({})), r.statusText); showBulkError(MSG_REMOVE_FAILED.replace('{detail}', () => detail)); return; }
+      }
+    } else {
+      const r = await fetch('/api/v1/media/unassign-batch', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({profile_id: profileId, media_ids: ids}),
+      });
+      if (!r.ok) { const detail = apiDetail(await r.json().catch(() => ({})), r.statusText); showBulkError(MSG_REMOVE_FAILED.replace('{detail}', () => detail)); return; }
+    }
+    location.reload();
+  } catch(e) { showBulkError(MSG_NETWORK_ERROR.replace('{error}', () => e)); }
+}
+
+async function bulkSetArtist() {
+  const artist = document.getElementById('bulk-artist').value.trim();
+  try {
+    const r = await fetch('/api/v1/media/update-batch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({media_ids: Array.from(selectedIds), artist: artist || null}),
+    });
+    if (!r.ok) { const detail = apiDetail(await r.json().catch(() => ({})), r.statusText); showBulkError(MSG_SET_ARTIST_FAILED.replace('{detail}', () => detail)); return; }
+    location.reload();
+  } catch(e) { showBulkError(MSG_NETWORK_ERROR.replace('{error}', () => e)); }
+}
+
+async function bulkSetPlaylist() {
+  const playlist = document.getElementById('bulk-playlist').value.trim();
+  if (!playlist) { showBulkError(MSG_PLAYLIST_REQUIRED); return; }
+  try {
+    const r = await fetch('/api/v1/media/update-batch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({media_ids: Array.from(selectedIds), playlist_title: playlist}),
+    });
+    if (!r.ok) { const detail = apiDetail(await r.json().catch(() => ({})), r.statusText); showBulkError(MSG_SET_PLAYLIST_FAILED.replace('{detail}', () => detail)); return; }
+    location.reload();
+  } catch(e) { showBulkError(MSG_NETWORK_ERROR.replace('{error}', () => e)); }
+}
+
+// ── View modal ──────────────────────────────────────────────────────────────
+let _viewCurrentId = null;
+
+const TYPE_ICON = { music: '♪', audiobook: '◎', photo: '⬛' };
+
+function openView(evt, id) {
+  // Don't fire if a button or checkbox inside the row was clicked
+  if (evt.target.closest('button, input')) return;
+
+  const row = document.getElementById('row-' + id);
+  _viewCurrentId = id;
+
+  const title   = row.dataset.title;
+  const artist  = row.dataset.artist;
+  const playlist = row.dataset.playlist;
+  const type    = row.dataset.type;
+  const status  = row.dataset.status;
+  const profiles = JSON.parse(row.dataset.profiles || '[]');
+  const largeThumb = row.dataset.largeThumb;
+  const thumb   = row.dataset.thumb;
+  const audio   = row.dataset.audio;
+  const loudness = row.dataset.loudness;
+
+  // Thumbnail
+  const img  = document.getElementById('view-thumb-img');
+  const icon = document.getElementById('view-thumb-icon');
+  const thumbHash = largeThumb || thumb;
+  if (thumbHash) {
+    img.src = '/web/media-file/' + thumbHash;
+    img.style.display = '';
+    icon.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    icon.style.display = '';
+    icon.textContent = TYPE_ICON[type] || '?';
+  }
+
+  document.getElementById('view-title').textContent = title || '—';
+  document.getElementById('view-artist').textContent = artist || '';
+  document.getElementById('view-artist').style.display = artist ? '' : 'none';
+  document.getElementById('view-playlist').textContent = playlist || '';
+  document.getElementById('view-playlist').style.display = playlist ? '' : 'none';
+  document.getElementById('view-loudness').textContent = loudness || '';
+  document.getElementById('view-loudness').style.display = loudness ? '' : 'none';
+
+  // Meta tags
+  const meta = document.getElementById('view-meta');
+  meta.innerHTML = '';
+  const addTag = (text, cls) => {
+    const s = document.createElement('span');
+    s.className = 'tag' + (cls ? ' ' + cls : '');
+    s.textContent = text;
+    meta.appendChild(s);
+  };
+  addTag(row.dataset.typeLabel || type);
+  const statusCls = status === 'ready' ? 'tag-ready' : status === 'failed' ? 'tag-failed' : status === 'processing' ? 'tag-processing' : '';
+  addTag(row.dataset.statusLabel || status, statusCls);
+  profiles.forEach(p => addTag(p));
+
+  // Audio player
+  const playerWrap = document.getElementById('view-player-wrap');
+  const player = document.getElementById('view-player');
+  if ((type === 'music' || type === 'audiobook') && audio) {
+    player.src = '/web/media-file/' + audio;
+    player.load();
+    playerWrap.style.display = '';
+  } else {
+    player.src = '';
+    playerWrap.style.display = 'none';
+  }
+
+  document.getElementById('view-modal-backdrop').style.display = 'block';
+  document.getElementById('view-modal').style.display = 'block';
+}
+
+// ── Loudness backfill ───────────────────────────────────────────────────────
+// Rows marked "Normalizing…" are stale once the queue has drained: reload to
+// show the result, but not while a modal is open (it would drop the input).
+function refreshWhenNormalized() {
+  if (!document.querySelector('.media-row[data-normalizing="1"]')) return;
+  const open = ['view-modal-backdrop', 'edit-modal-backdrop'].some(
+    id => document.getElementById(id).style.display === 'block');
+  if (open) { setTimeout(pollNormalize, 5000); return; }
+  // Groups start collapsed: remember the open ones across the reload.
+  try {
+    const names = [...document.querySelectorAll('details.media-group[open]')]
+      .map(d => d.querySelector('.media-group-name').textContent);
+    sessionStorage.setItem('kp-open-groups', JSON.stringify(names));
+  } catch (e) { /* storage blocked: the groups just start collapsed */ }
+  location.reload();
+}
+
+(function reopenGroups() {
+  try {
+    const names = JSON.parse(sessionStorage.getItem('kp-open-groups') || '[]');
+    sessionStorage.removeItem('kp-open-groups');
+    document.querySelectorAll('details.media-group').forEach(d => {
+      if (names.includes(d.querySelector('.media-group-name').textContent)) d.open = true;
+    });
+  } catch (e) { /* nothing remembered */ }
+})();
+
+function showNormalizeStatus(s) {
+  if (!s.started_at) return;  // no normalization queued since the server started
+  const done = s.normalized + s.skipped + s.unchanged + s.failed;
+  let text = s.running
+    ? MSG_NORMALIZING.replace('{done}', done).replace('{total}', s.total)
+    : [
+        MSG_NORM_NORMALIZED.replace('{n}', s.normalized),
+        MSG_NORM_SKIPPED.replace('{n}', s.skipped),
+        ...(s.unchanged ? [MSG_NORM_UNCHANGED.replace('{n}', s.unchanged)] : []),
+        ...(s.failed ? [MSG_NORM_FAILED.replace('{n}', s.failed)] : []),
+      ].join(', ');
+  document.getElementById('normalize-status').textContent = text;
+  document.getElementById('normalize-btn').disabled = s.running;
+  if (s.running) setTimeout(pollNormalize, 2000);
+  else refreshWhenNormalized();
+}
+
+async function pollNormalize() {
+  const r = await fetch('/api/v1/media/normalize');
+  if (r.ok) showNormalizeStatus(await r.json());
+}
+
+async function startNormalize() {
+  const r = await fetch('/api/v1/media/normalize', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({all: true}),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (r.ok) { showNormalizeStatus(data); return; }
+  document.getElementById('normalize-status').textContent =
+    MSG_NORMALIZE_FAILED.replace('{detail}', () => apiDetail(data, r.statusText));
+}
+
+// Pick up normalization that is already running (a backfill, or uploads
+// still normalizing) when the page loads.
+pollNormalize().catch(() => {});
+
+function closeView() {
+  const player = document.getElementById('view-player');
+  player.pause();
+  player.src = '';
+  document.getElementById('view-modal-backdrop').style.display = 'none';
+  document.getElementById('view-modal').style.display = 'none';
+  _viewCurrentId = null;
+}
+
+// ── Edit modal ──────────────────────────────────────────────────────────────
+let _editOriginalProfileIds = [];
+
+function openEdit(id) {
+  const row = document.getElementById('row-' + id);
+  document.getElementById('modal-id').value = id;
+  document.getElementById('modal-title').value = row.dataset.title;
+  document.getElementById('modal-artist').value = row.dataset.artist;
+  document.getElementById('modal-playlist').value = row.dataset.playlist;
+  document.getElementById('modal-type').value = row.dataset.type;
+
+  _editOriginalProfileIds = JSON.parse(row.dataset.profileIds || '[]');
+
+  // Build profile checkboxes
+  const container = document.getElementById('modal-profiles');
+  container.innerHTML = '';
+  if (ALL_PROFILES.length === 0) {
+    container.innerHTML = '<span style="color:#888;font-size:0.85rem;">' + esc(MSG_NO_PROFILES) + '</span>';
+  } else {
+    ALL_PROFILES.forEach(p => {
+      const checked = _editOriginalProfileIds.includes(p.id);
+      const label = document.createElement('label');
+      label.style.cssText = 'display:flex;align-items:center;gap:0.35rem;cursor:pointer;font-size:0.9rem;color:#e0e0e0;background:#2a2f3e;padding:0.3rem 0.6rem;border-radius:4px;';
+      label.innerHTML =
+        '<input type="checkbox" value="' + esc(p.id) + '"' + (checked ? ' checked' : '') + '> ' + esc(p.name);
+      container.appendChild(label);
+    });
+  }
+
+  document.getElementById('modal-error').style.display = 'none';
+  document.getElementById('edit-modal-backdrop').style.display = '';
+  document.getElementById('edit-modal').style.display = '';
+  document.getElementById('modal-title').focus();
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal-backdrop').style.display = 'none';
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+async function saveEdit() {
+  const id = document.getElementById('modal-id').value;
+  const title = document.getElementById('modal-title').value.trim();
+  const artist = document.getElementById('modal-artist').value.trim();
+  const playlist = document.getElementById('modal-playlist').value.trim();
+  const mediaType = document.getElementById('modal-type').value;
+
+  if (!title || !playlist) {
+    showModalError(MSG_TITLE_PLAYLIST_REQUIRED);
+    return;
+  }
+
+  // Collect checked profile IDs
+  const newProfileIds = Array.from(
+    document.querySelectorAll('#modal-profiles input[type=checkbox]:checked')
+  ).map(cb => cb.value);
+
+  const toAssign = newProfileIds.filter(pid => !_editOriginalProfileIds.includes(pid));
+  const toUnassign = _editOriginalProfileIds.filter(pid => !newProfileIds.includes(pid));
+
+  try {
+    // 1. Update metadata + type
+    const resp = await fetch('/api/v1/media/' + id, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        title,
+        artist: artist || null,
+        playlist_title: playlist,
+        media_type: mediaType,
+      }),
+    });
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      showModalError(MSG_SAVE_FAILED.replace('{detail}', () => apiDetail(data, resp.statusText)));
+      return;
+    }
+
+    // 2. Assign new profiles
+    if (toAssign.length > 0) {
+      const ar = await fetch('/api/v1/media/' + id + '/assign', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({profile_ids: toAssign}),
+      });
+      if (!ar.ok) {
+        const data = await ar.json().catch(() => ({}));
+        showModalError(MSG_ASSIGN_FAILED.replace('{detail}', () => apiDetail(data, ar.statusText)));
+        return;
+      }
+    }
+
+    // 3. Unassign removed profiles
+    for (const pid of toUnassign) {
+      const dr = await fetch('/api/v1/media/' + id + '/assign/' + pid, {method: 'DELETE'});
+      if (!dr.ok) {
+        const data = await dr.json().catch(() => ({}));
+        showModalError(MSG_UNASSIGN_FAILED.replace('{detail}', () => apiDetail(data, dr.statusText)));
+        return;
+      }
+    }
+
+    location.reload();
+  } catch(e) {
+    showModalError(MSG_NETWORK_ERROR.replace('{error}', () => e));
+  }
+}
+
+function showModalError(msg) {
+  const el = document.getElementById('modal-error');
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('view-modal').style.display === 'block') closeView();
+    else closeEdit();
+  }
+});
+</script>
+{% endblock %}

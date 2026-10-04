@@ -1,0 +1,60 @@
+# KidsPlay server. Quick start (from the repo root):
+#
+#   docker compose -f docker/docker-compose.yml up -d --build
+#
+# then open http://<this-host>:8000/ for the web UI. The first visit asks you
+# to choose the admin password; it also asks for the one-time setup code the
+# server prints at startup (`docker compose -f docker/docker-compose.yml logs
+# kidsplay-server`), so nobody else on the network can claim the account.
+# Or pre-seed the password with KIDSPLAY_ADMIN_PASSWORD and skip both.
+# Device sync endpoints authenticate each device with its API key.
+name: kidsplay
+
+services:
+  kidsplay-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        # YouTube import (the yt-dlp plugin) is included by default. Set
+        # KIDSPLAY_WITH_YTDLP=0 in docker/.env for a core-only image (any of
+        # 1/true/yes/on or 0/false/no/off; other values fail the build).
+        KIDSPLAY_WITH_YTDLP: ${KIDSPLAY_WITH_YTDLP:-1}
+    container_name: kidsplay-server
+    ports:
+      - "${KIDSPLAY_PORT:-8000}:80"
+    volumes:
+      # Host paths default to ./data next to this file; override in docker/.env.
+      - ${KIDSPLAY_DATA_DIR:-./data}/db:/data/db
+      - ${KIDSPLAY_DATA_DIR:-./data}/media-store:/data/media-store
+      # Target for `kidsplay-server backup` (see docs/BACKUP.md).
+      - ${KIDSPLAY_BACKUP_DIR:-./data/backups}:/data/backups
+      # Optional read-only library the web UI can import from.
+      - ${KIDSPLAY_SOURCE_DIR:-./data/source}:/mnt/source:ro
+      # - ./yt-cookies.txt:/data/yt-cookies.txt:ro
+    environment:
+      - KIDSPLAY_DB_PATH=/data/db/kidsplay.db
+      - KIDSPLAY_MEDIA_STORE=/data/media-store
+      # - KIDSPLAY_YT_COOKIES=/data/yt-cookies.txt
+      # Optional: set the admin password without the first-run setup page.
+      # - KIDSPLAY_ADMIN_PASSWORD=change-me
+      # Behind a reverse proxy (Caddy, nginx, Traefik): list the proxy's
+      # address or network so per-client limits and the HTTPS session cookie
+      # work. Without it every client looks like the proxy. See
+      # docs/DEVELOPMENT.md#behind-a-reverse-proxy.
+      # - KIDSPLAY_TRUSTED_PROXIES=172.16.0.0/12
+      # The session cookie is marked Secure automatically over HTTPS. Force it
+      # with 1, or turn it off with 0.
+      # - KIDSPLAY_COOKIE_SECURE=1
+      # Only behind a reverse proxy that already authenticates:
+      # - KIDSPLAY_AUTH=disabled
+      # Loudness normalization at ingest (see docs/LOUDNESS.md):
+      # - KIDSPLAY_LOUDNESS_TARGET_LUFS=-16
+      # - KIDSPLAY_LOUDNESS_TARGET_LUFS_AUDIOBOOK=-14
+      # - KIDSPLAY_LOUDNORM=disabled
+      # mDNS advertising (so handhelds can find the server while pairing) is
+      # off here: on Docker's bridge network it would announce the
+      # container's private address. Devices type the server address instead.
+      # With `network_mode: host` you can remove this line (see docs/PAIRING.md).
+      - KIDSPLAY_MDNS=0
+    restart: unless-stopped

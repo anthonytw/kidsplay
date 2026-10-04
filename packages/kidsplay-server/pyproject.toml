@@ -1,0 +1,48 @@
+[project]
+name = "kidsplay-server"
+version = "0.1.0"
+description = "FastAPI server for media management, processing, and device sync"
+requires-python = ">=3.12"
+license = {text = "AGPL-3.0-or-later"}
+dependencies = [
+    "kidsplay-models",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "aiosqlite>=0.20",
+    "pillow>=11.0",
+    "mutagen>=1.47",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.12",
+    "httpx>=0.27",
+    "aiofiles>=24.0",
+    # No yt-dlp here: YouTube support is the optional kidsplay-importer-ytdlp
+    # plugin (packages/kidsplay-importer-ytdlp), found via entry points.
+    # `kidsplay-server backup/restore` CLI (Click, as in kidsplay-cli).
+    "click>=8.1",
+    # .tar.zst backups. Python 3.12 has no stdlib zstd (compression.zstd is
+    # 3.14+); zstandard ships wheels for x86_64 and aarch64 and streams.
+    "zstandard>=0.23",
+    # Admin auth: password hashing and signed session cookies.
+    "argon2-cffi>=25.1.0",
+    "itsdangerous>=2.2.0",
+    # Optional mDNS advertising (_kidsplay._tcp) so handhelds can find the
+    # server while pairing. Pure Python; only imported when advertising.
+    "zeroconf>=0.132",
+    # kidsplay_server.discovery lists the machine's addresses with it directly
+    # (zeroconf pulls it in, but we should not rely on that).
+    "ifaddr>=0.2",
+]
+
+[project.scripts]
+kidsplay-server = "kidsplay_server.cli:main"
+kidsplay-allinone = "kidsplay_server.allinone:main"
+
+[tool.uv.sources]
+kidsplay-models = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kidsplay_server"]

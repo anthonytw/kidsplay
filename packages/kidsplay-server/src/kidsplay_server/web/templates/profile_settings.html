@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %} — {% trans name=profile.name %}{{ name }} settings{% endtrans %}{% endblock %}
+
+{% block content %}
+<h1>{% trans name=profile.name %}{{ name }} — settings{% endtrans %}</h1>
+<p style="color:#666; font-size:0.88rem;">
+  {% trans %}Applied on every device linked to this profile after its next sync, and kept
+  on the device so they work offline.{% endtrans %} <a href="/profiles">{{ _('Back to profiles') }}</a>
+</p>
+
+<div id="settings-result" class="hidden"></div>
+
+<div style="display:flex; gap:1.5rem; align-items:flex-start; flex-wrap:wrap;">
+  <div class="card" style="flex:1; min-width:280px;">
+    <h2>{{ _('Language') }}</h2>
+    <div class="field">
+      <label for="device-language">{{ _('Language on the device') }}</label>
+      <select id="device-language">
+        {% for code, name in device_languages %}
+        <option value="{{ code }}" {% if code == device_language %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+      <p style="color:#666; font-size:0.8rem;">
+        {{ _("The language of this child's screens. It is the child's setting, not yours: the web UI and the CLI use your own language.") }}
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="flex:1; min-width:280px;">
+    <h2>{{ _('Theme') }}</h2>
+    <div class="field">
+      <label for="device-theme">{{ _('Look of the device') }}</label>
+      <select id="device-theme">
+        <option value="" {% if settings.theme is none %}selected{% endif %}>{{ _("Chosen on the device") }}</option>
+        {% for theme_id, label in themes %}
+        <option value="{{ theme_id }}" {% if theme_id == settings.theme %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <p style="color:#666; font-size:0.8rem;">
+        {{ _("Colors, and any font, sounds and backgrounds of the theme. A theme chosen here replaces the one picked on the device, and reaches it at its next sync. Without one, the child can pick a color on the device (blue at first).") }}
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="flex:1; min-width:280px;">
+    <h2>{{ _('Volume') }}</h2>
+    <div class="field">
+      <label for="max-volume">{% trans %}Maximum volume:{% endtrans %} <strong id="max-volume-value">{{ settings.max_volume }}</strong>%</label>
+      <input type="range" id="max-volume" min="0" max="100" step="5"
+             value="{{ settings.max_volume }}"
+             oninput="document.getElementById('max-volume-value').textContent = this.value">
+      <p style="color:#666; font-size:0.8rem;">
+        {% trans %}The player attenuates everything it plays, UI sounds included, to this
+        level. The device's own volume dial and OS volume act on top of it, so
+        they can only make it quieter.{% endtrans %}
+      </p>
+    </div>
+    <div class="field">
+      <label for="volume-buttons">{{ _('In-app volume buttons') }}</label>
+      <select id="volume-buttons">
+        <option value="" {% if settings.volume_buttons is none %}selected{% endif %}>{{ _('Device default') }}</option>
+        <option value="on" {% if settings.volume_buttons is true %}selected{% endif %}>{{ _('On') }}</option>
+        <option value="off" {% if settings.volume_buttons is false %}selected{% endif %}>{{ _('Off') }}</option>
+      </select>
+      <p style="color:#666; font-size:0.8rem;">
+        {{ _('For hardware without a volume dial. "Device default" follows the device: on for a keyboard, off for the GPi Case 2. Never louder than the maximum above.') }}
+      </p>
+    </div>
+    <div class="field">
+      <label for="ui-sounds">{{ _('Button sounds') }}</label>
+      <select id="ui-sounds">
+        <option value="on" {% if settings.ui_sounds %}selected{% endif %}>{{ _('On') }}</option>
+        <option value="off" {% if not settings.ui_sounds %}selected{% endif %}>{{ _('Off') }}</option>
+      </select>
+      <p style="color:#666; font-size:0.8rem;">
+        {{ _('The short beep when a button is pressed. Off means silence, and the music no longer dips for it.') }}
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="flex:2; min-width:340px;">
+    <h2>{{ _('Bedtime') }}</h2>
+    <div class="field">
+      <label for="bedtime-mode">{{ _('During bedtime') }}</label>
+      <select id="bedtime-mode">
+        {% for value, label in modes %}
+        <option value="{{ value }}" {% if settings.bedtime_mode == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <table class="stack">
+      <thead>
+        <tr><th>{{ _('Day') }}</th><th>{{ _('Bedtime') }}</th><th>{{ _('Wake') }}</th><th>{{ _('Enabled') }}</th></tr>
+      </thead>
+      <tbody>
+      {% for key, label in weekdays %}
+        {% set window = settings.bedtime_schedule.get(key) %}
+        <tr>
+          <td>{{ label }}</td>
+          <td><input type="time" id="bedtime-{{ key }}" value="{{ window.bedtime.strftime('%H:%M') if window else '20:00' }}"></td>
+          <td><input type="time" id="wake-{{ key }}" value="{{ window.wake.strftime('%H:%M') if window else '07:00' }}"></td>
+          <td><input type="checkbox" id="enabled-{{ key }}" data-day="{{ key }}" class="day-enabled" {% if window %}checked{% endif %}></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p style="color:#666; font-size:0.8rem;">
+      {% trans %}Times are the device's local time. A day's bedtime runs until the next
+      wake time, so a wake time earlier than bedtime means the next morning.
+      When bedtime starts during playback the device fades the sound out over
+      about 10 seconds. The device has no battery-backed clock: if it boots
+      offline with a clock that is obviously wrong, bedtime is not enforced
+      until it reaches the server.{% endtrans %}
+    </p>
+  </div>
+</div>
+
+<button class="btn btn-primary" onclick="saveSettings()">{{ _('Save') }}</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const T = {
+  saved: {{ _('✓ Saved. Devices pick this up at their next sync.')|tojson }},
+  error: {{ _('Error: {detail}')|tojson }},
+};
+
+async function saveSettings() {
+  const schedule = {};
+  document.querySelectorAll('.day-enabled').forEach(function (box) {
+    if (!box.checked) return;
+    const day = box.dataset.day;
+    schedule[day] = {
+      bedtime: document.getElementById('bedtime-' + day).value,
+      wake: document.getElementById('wake-' + day).value,
+    };
+  });
+  const body = {
+    max_volume: parseInt(document.getElementById('max-volume').value, 10),
+    volume_buttons: {'on': true, 'off': false}[document.getElementById('volume-buttons').value] ?? null,
+    ui_sounds: document.getElementById('ui-sounds').value === 'on',
+    bedtime_mode: document.getElementById('bedtime-mode').value,
+    bedtime_schedule: schedule,
+    language: document.getElementById('device-language').value,
+    theme: document.getElementById('device-theme').value || null,
+  };
+  const result = document.getElementById('settings-result');
+  const resp = await fetch('/api/v1/profiles/{{ profile.id }}/settings', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  if (resp.ok) {
+    result.className = 'alert alert-success';
+    result.textContent = T.saved;
+  } else {
+    const data = await resp.json().catch(() => ({}));
+    const detail = apiDetail(data, resp.statusText);
+    result.className = 'alert alert-error';
+    result.textContent = T.error.replace('{detail}', detail);
+  }
+}
+</script>
+{% endblock %}

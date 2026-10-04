@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Profiles') }}{% endblock %}
+
+{% block content %}
+<h1>{{ _('Profiles') }}</h1>
+
+<div class="split">
+
+  <!-- Profile list -->
+  <div class="split-main-narrow">
+    <table class="stack">
+      <thead>
+        <tr>
+          <th>{{ _('Name') }}</th>
+          <th>ID</th>
+          <th style="width:150px;"></th>
+        </tr>
+      </thead>
+      <tbody id="profile-list">
+      {% for p in profiles %}
+        <tr id="profile-{{ p.id }}">
+          <td><strong>{{ p.name }}</strong></td>
+          <td style="font-family:monospace; font-size:0.76rem; color:#888;">{{ p.id }}</td>
+          <td class="actions">
+            <a class="btn btn-secondary btn-sm" href="/profiles/{{ p.id }}/settings">{{ _('Settings') }}</a>
+            <button class="btn btn-danger btn-sm"
+              hx-delete="/api/v1/profiles/{{ p.id }}"
+              hx-confirm="{{ _("Delete profile '%(name)s'? This will fail if devices are linked.", name=p.name) }}"
+              hx-target="#profile-{{ p.id }}"
+              hx-swap="outerHTML">{{ _('Delete') }}</button>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3" style="text-align:center; color:#888; padding:1.5rem;">{{ _('No profiles yet.') }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Create profile form -->
+  <div class="split-side">
+    <div class="card">
+      <h2>{{ _('New profile') }}</h2>
+      <div id="profile-create-result" class="hidden" style="margin-bottom:0.75rem;"></div>
+      <div class="field">
+        <label for="new-profile-name">{{ _('Name') }}</label>
+        <input type="text" id="new-profile-name" placeholder="{{ _('e.g. Leo') }}">
+      </div>
+      <button class="btn btn-primary" onclick="createProfile()">{{ _('Create') }}</button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const T = {
+  enterName: {{ _('Enter a profile name.')|tojson }},
+  confirmDelete: {{ _("Delete profile '{name}'?")|tojson }},
+  settings: {{ _('Settings')|tojson }},
+  delete: {{ _('Delete')|tojson }},
+  created: {{ _('✓ Profile created.')|tojson }},
+  error: {{ _('Error: {detail}')|tojson }},
+};
+
+async function createProfile() {
+  const name = document.getElementById('new-profile-name').value.trim();
+  if (!name) { alert(T.enterName); return; }
+  const result = document.getElementById('profile-create-result');
+  result.classList.add('hidden');
+
+  const resp = await fetch('/api/v1/profiles', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name}),
+  });
+  const data = await resp.json();
+  if (resp.status === 201) {
+    // Append row to table
+    const tbody = document.getElementById('profile-list');
+    // Remove empty-state row if present
+    const empty = tbody.querySelector('td[colspan]');
+    if (empty) empty.closest('tr').remove();
+
+    const tr = document.createElement('tr');
+    tr.id = 'profile-' + data.id;
+    tr.innerHTML =
+      '<td><strong>' + data.name + '</strong></td>' +
+      '<td style="font-family:monospace;font-size:.76rem;color:#888;">' + data.id + '</td>' +
+      '<td class="actions">' +
+        '<a class="btn btn-secondary btn-sm" href="/profiles/' + data.id + '/settings">' + T.settings + '</a> ' +
+        '<button class="btn btn-danger btn-sm"' +
+        ' hx-delete="/api/v1/profiles/' + data.id + '"' +
+        ' hx-confirm="' + T.confirmDelete.replace('{name}', data.name) + '"' +
+        ' hx-target="#profile-' + data.id + '"' +
+        ' hx-swap="outerHTML">' + T.delete + '</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+    htmx.process(tr); // register htmx attributes on dynamically created element
+
+    document.getElementById('new-profile-name').value = '';
+    result.className = 'alert alert-success';
+    result.textContent = T.created;
+    result.classList.remove('hidden');
+  } else {
+    result.className = 'alert alert-error';
+    result.textContent = T.error.replace('{detail}', apiDetail(data, resp.statusText));
+    result.classList.remove('hidden');
+  }
+}
+</script>
+{% endblock %}

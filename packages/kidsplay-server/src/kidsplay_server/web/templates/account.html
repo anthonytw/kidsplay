@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Account') }}{% endblock %}
+
+{% block content %}
+<h1>{{ _('Account') }}</h1>
+
+{% if not auth_enabled %}
+<p class="card">{% trans %}Admin authentication is turned off (<code>KIDSPLAY_AUTH=disabled</code>), so there is no password to manage here.{% endtrans %}</p>
+{% else %}
+<div class="card" style="max-width:480px;">
+  <h2>{{ _('Change password') }}</h2>
+  <p style="margin-bottom:1rem;">{% trans %}Other browsers are logged out. API tokens keep working unless you tick the box below; you can also revoke them on the API Tokens page.{% endtrans %}</p>
+  <form id="password-form" onsubmit="changePassword(event)">
+    <div class="field">
+      <label for="current_password">{{ _('Current password') }}</label>
+      <input type="password" id="current_password" autocomplete="current-password" required>
+    </div>
+    <div class="field">
+      <label for="new_password">{% trans min=min_password_length %}New password (at least {{ min }} characters){% endtrans %}</label>
+      <input type="password" id="new_password" autocomplete="new-password"
+        minlength="{{ min_password_length }}" required>
+    </div>
+    <div class="field">
+      <label for="confirm_password">{{ _('Confirm new password') }}</label>
+      <input type="password" id="confirm_password" autocomplete="new-password"
+        minlength="{{ min_password_length }}" required>
+    </div>
+    <div class="field">
+      <label for="revoke_tokens">
+        <input type="checkbox" id="revoke_tokens">
+        {{ _('Also revoke all API tokens') }}
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ _('Change password') }}</button>
+  </form>
+  <div id="password-ok" class="alert alert-success hidden" style="margin-top:1rem;"></div>
+  <div id="password-error" class="alert alert-error hidden" style="margin-top:1rem;"></div>
+</div>
+
+<div class="card" style="max-width:480px;">
+  <h2>{{ _('Log out everywhere') }}</h2>
+  <p style="margin-bottom:1rem;">{% trans %}Ends every browser session, including this one. Use it if you left yourself logged in on a shared computer. API tokens are not affected.{% endtrans %}</p>
+  <button type="button" class="btn btn-danger" onclick="logoutEverywhere()">{{ _('Log out all sessions') }}</button>
+  <div id="sessions-error" class="alert alert-error hidden" style="margin-top:1rem;"></div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if auth_enabled %}
+<script>
+const T = {
+  mismatch: {{ _('The new passwords do not match.')|tojson }},
+  changed: {{ _('Password changed. Other browsers were logged out.')|tojson }},
+  wrong: {{ _('The current password is incorrect.')|tojson }},
+  tooShort: {{ _('The new password is too short.')|tojson }},
+  throttled: {{ _('Too many failed attempts. Try again later.')|tojson }},
+  failed: {{ _('Something went wrong (HTTP {status}).')|tojson }},
+  confirmAll: {{ _('Log out every browser session, including this one?')|tojson }},
+};
+
+function show(id, text) {
+  for (const other of ['password-ok', 'password-error', 'sessions-error']) {
+    document.getElementById(other).classList.add('hidden');
+  }
+  const box = document.getElementById(id);
+  box.textContent = text;
+  box.classList.remove('hidden');
+}
+
+async function changePassword(event) {
+  event.preventDefault();
+  const current = document.getElementById('current_password').value;
+  const next = document.getElementById('new_password').value;
+  if (next !== document.getElementById('confirm_password').value) {
+    show('password-error', T.mismatch);
+    return;
+  }
+  const resp = await fetch('/api/v1/auth/password', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      current_password: current,
+      new_password: next,
+      revoke_tokens: document.getElementById('revoke_tokens').checked,
+    }),
+  });
+  if (resp.status === 204) {
+    document.getElementById('password-form').reset();
+    show('password-ok', T.changed);
+    return;
+  }
+  let code = '';
+  try { code = (await resp.json()).error_code || ''; } catch (e) { /* not JSON */ }
+  if (code === 'WRONG_PASSWORD') {
+    show('password-error', T.wrong);
+  } else if (code === 'PASSWORD_TOO_SHORT') {
+    show('password-error', T.tooShort);
+  } else if (code === 'RATE_LIMITED') {
+    show('password-error', T.throttled);
+  } else {
+    show('password-error', T.failed.replace('{status}', resp.status));
+  }
+}
+
+async function logoutEverywhere() {
+  if (!confirm(T.confirmAll)) return;
+  const resp = await fetch('/api/v1/auth/sessions/revoke', {method: 'POST'});
+  if (resp.ok) {
+    window.location.href = '/login';
+  } else {
+    show('sessions-error', T.failed.replace('{status}', resp.status));
+  }
+}
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,877 @@
+# Translations for kidsplay_cli.
+# Copyright (C) KidsPlay contributors
+# This file is distributed under the same license as the KidsPlay project.
+msgid ""
+msgstr ""
+"Project-Id-Version: kidsplay_cli 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/anthonytw/kidsplay/issues\n"
+"POT-Creation-Date: 2026-01-01 00:00+0000\n"
+"PO-Revision-Date: 2026-01-01 00:00+0000\n"
+"Last-Translator: KidsPlay contributors\n"
+"Language: es\n"
+"Language-Team: KidsPlay contributors\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: media.py
+#, python-brace-format
+msgid "  Artist:     {value}"
+msgstr "  Artista:    {value}"
+
+#: media.py
+#, python-brace-format
+msgid "  Created:    {value}"
+msgstr "  Creado:     {value}"
+
+#: media.py
+#, python-brace-format
+msgid "  Duration:   {mins}:{secs:02d}"
+msgstr "  Duración:   {mins}:{secs:02d}"
+
+#: media.py
+#, python-brace-format
+msgid "  ID:         [dim]{value}[/dim]"
+msgstr "  ID:         [dim]{value}[/dim]"
+
+#: media.py
+#, python-brace-format
+msgid "  Loudness:   {value}"
+msgstr "  Sonoridad:  {value}"
+
+#: media.py
+#, python-brace-format
+msgid "  Playlist:   {value}"
+msgstr "  Lista:      {value}"
+
+#: media.py
+#, python-brace-format
+msgid "  Status:     {value}"
+msgstr "  Estado:     {value}"
+
+#: media.py
+#, python-brace-format
+msgid "  Type:       {value}"
+msgstr "  Tipo:       {value}"
+
+#: media.py
+#, python-brace-format
+msgid "  [red]…and {n} more failed[/red]"
+msgstr "  [red]…y {n} más con error[/red]"
+
+#: media.py
+#, python-brace-format
+msgid "  [red]✗[/red] {path}: {errors}"
+msgstr "  [red]✗[/red] {path}: {errors}"
+
+#: media.py
+#, python-brace-format
+msgid ""
+"  {normalized} normalized, {skipped} skipped, {unchanged} unchanged, {failed} failed "
+"(of {total})"
+msgstr ""
+"  {normalized} normalizados, {skipped} omitidos, {unchanged} sin cambios, {failed} "
+"con error (de {total})"
+
+#: devices.py
+msgid "API key of the already-registered device. Required with --device-id."
+msgstr "API key del dispositivo ya registrado. Obligatoria con --device-id."
+
+#: main.py
+msgid ""
+"Admin API token. Overrides the KIDSPLAY_TOKEN environment variable and the token "
+"saved by 'kidsplay auth login'."
+msgstr ""
+"Token de la API de administración. Tiene prioridad sobre la variable de entorno "
+"KIDSPLAY_TOKEN y sobre el token guardado por 'kidsplay auth login'."
+
+#: auth.py
+msgid "Admin password"
+msgstr "Contraseña de administrador"
+
+#: auth.py
+msgid "Admin password (prompted for if omitted)."
+msgstr "Contraseña de administrador (se solicita si se omite)."
+
+#: media.py
+msgid "Artist"
+msgstr "Artista"
+
+#: media.py
+msgid "Assign MEDIA_ID to PROFILE_ID."
+msgstr "Asigna MEDIA_ID a PROFILE_ID."
+
+#: devices.py
+msgid "Bedtime mode"
+msgstr "Modo hora de dormir"
+
+#: devices.py
+#, python-brace-format
+msgid "Bedtime {day}"
+msgstr "Hora de dormir {day}"
+
+#: devices.py
+msgid "Button sounds"
+msgstr "Sonidos de botones"
+
+#: credentials.py
+#, python-brace-format
+msgid "Cannot read credentials file {path}: {exc}"
+msgstr "No se puede leer el archivo de credenciales {path}: {exc}"
+
+#: devices.py media.py
+msgid "Confirm the action without prompting."
+msgstr "Confirma la acción sin preguntar."
+
+#: devices.py
+msgid "Create a new profile with NAME."
+msgstr "Crea un perfil nuevo con NAME."
+
+#: auth.py
+msgid ""
+"Create an admin API token and save it for this server.\n"
+"\n"
+"The token is stored in ~/.config/kidsplay/credentials.json (mode 0600)\n"
+"and used automatically by every other command."
+msgstr ""
+"Crea un token de administración de la API y lo guarda para este servidor.\n"
+"\n"
+"El token se almacena en ~/.config/kidsplay/credentials.json (modo 0600)\n"
+"y lo usan automáticamente todos los demás comandos."
+
+#: devices.py
+msgid "Created"
+msgstr "Creado"
+
+#: media.py
+msgid "Delete a media item and all its processed files."
+msgstr "Elimina un archivo multimedia y todos sus archivos procesados."
+
+#: devices.py
+msgid "Delete the profile with PROFILE_ID."
+msgstr "Elimina el perfil con PROFILE_ID."
+
+#: devices.py
+msgid "Delete this device?"
+msgstr "¿Eliminar este dispositivo?"
+
+#: media.py
+msgid "Delete this media item and all its files?"
+msgstr "¿Eliminar este archivo multimedia y todos sus archivos?"
+
+#: devices.py
+msgid "Delete this profile?"
+msgstr "¿Eliminar este perfil?"
+
+#: devices.py
+msgid "Device name. Required when registering a new device."
+msgstr "Nombre del dispositivo. Obligatorio al registrar un dispositivo nuevo."
+
+#: devices.py
+msgid "Devices"
+msgstr "Dispositivos"
+
+#: devices.py
+msgid "Display"
+msgstr "Pantalla"
+
+#: devices.py
+msgid "Enable the in-app volume buttons (for hardware without a dial)."
+msgstr "Activa los botones de volumen de la aplicación (para equipos sin perilla)."
+
+#: media.py
+msgid "Filter by profile UUID."
+msgstr "Filtra por UUID de perfil."
+
+#: devices.py
+msgid "Friday"
+msgstr "viernes"
+
+#: devices.py
+msgid ""
+"Generate a device config file.\n"
+"\n"
+"Two modes:\n"
+"\n"
+"\n"
+"NEW DEVICE — register on the server and generate config:\n"
+"  kidsplay device setup --name \"Alice's Gameboy\" --profile <profile-id>\n"
+"\n"
+"\n"
+"EXISTING DEVICE — generate config without re-registering:\n"
+"  kidsplay device setup --device-id <id> --api-key <key>\n"
+"\n"
+"\n"
+"By default the config JSON is printed to stdout so you can copy it to the\n"
+"device. Use --output to write directly to a file:\n"
+"  kidsplay device setup ... -o config.json"
+msgstr ""
+"Genera un archivo de configuración del dispositivo.\n"
+"\n"
+"Hay dos modos:\n"
+"\n"
+"\n"
+"DISPOSITIVO NUEVO — registrarlo en el servidor y generar la configuración:\n"
+"  kidsplay device setup --name \"Alice's Gameboy\" --profile <profile-id>\n"
+"\n"
+"\n"
+"DISPOSITIVO EXISTENTE — generar la configuración sin volver a registrarlo:\n"
+"  kidsplay device setup --device-id <id> --api-key <key>\n"
+"\n"
+"\n"
+"De forma predeterminada, el JSON de configuración se imprime en la salida\n"
+"estándar para que lo copies al dispositivo. Usa --output para escribirlo\n"
+"directamente en un archivo:\n"
+"  kidsplay device setup ... -o config.json"
+
+#: media.py
+msgid "Give --all, one or more MEDIA_IDS, or --status."
+msgstr "Indica --all, uno o más MEDIA_IDS, o --status."
+
+#: media.py
+msgid "Give either --all or MEDIA_IDS, not both."
+msgstr "Indica --all o MEDIA_IDS, pero no ambos."
+
+#: devices.py media.py
+msgid "ID"
+msgstr "ID"
+
+#: media.py
+msgid ""
+"Ingest media from PATH on the server filesystem.\n"
+"\n"
+"PATH can be a single file or a directory.  For directories, all\n"
+"supported files are processed recursively."
+msgstr ""
+"Importa archivos multimedia desde PATH en el sistema de archivos del servidor.\n"
+"\n"
+"PATH puede ser un solo archivo o un directorio.  En el caso de un directorio,\n"
+"se procesan de forma recursiva todos los archivos compatibles."
+
+#: media.py
+#, python-brace-format
+msgid "Ingested {total} file(s): {parts}"
+msgstr "Se importaron {total} archivo(s): {parts}"
+
+#: importers.py
+msgid "Inspect the media sources (importers) the server supports."
+msgstr "Consulta las fuentes de medios (importadores) que admite el servidor."
+
+#: main.py
+msgid ""
+"KidsPlay — media management for kids' devices.\n"
+"\n"
+"Manages media, profiles, and devices on the KidsPlay server.\n"
+"Set KIDSPLAY_SERVER to avoid passing --server every time, and run\n"
+"'kidsplay auth login' once to save an admin token for that server."
+msgstr ""
+"KidsPlay — gestión de medios para los dispositivos de los niños.\n"
+"\n"
+"Administra los medios, los perfiles y los dispositivos del servidor KidsPlay.\n"
+"Define KIDSPLAY_SERVER para no tener que indicar --server cada vez, y ejecuta\n"
+"'kidsplay auth login' una vez para guardar un token de administración de ese servidor."
+
+#: importers.py
+msgid "Label"
+msgstr "Etiqueta"
+
+#: auth.py
+msgid "Label for the token on the server. Default: kidsplay-cli@<hostname>."
+msgstr "Etiqueta del token en el servidor. Predeterminada: kidsplay-cli@<hostname>."
+
+#: devices.py
+msgid "Language"
+msgstr "Idioma"
+
+#: main.py
+msgid ""
+"Language of messages (en, es). Defaults to LANGUAGE, LC_ALL, LC_MESSAGES or LANG, "
+"then English."
+msgstr ""
+"Idioma de los mensajes (en, es). Por omisión se usa LANGUAGE, LC_ALL, LC_MESSAGES o "
+"LANG y, si no hay ninguno, inglés."
+
+#: devices.py
+msgid "Language of the device's screens."
+msgstr "Idioma de las pantallas del dispositivo."
+
+#: devices.py
+msgid "Last sync"
+msgstr "Última sincronización"
+
+#: devices.py
+msgid "List all profiles."
+msgstr "Muestra todos los perfiles."
+
+#: devices.py
+msgid "List all registered devices."
+msgstr "Muestra todos los dispositivos registrados."
+
+#: media.py
+msgid "List media items with optional filtering."
+msgstr "Muestra los archivos multimedia, con filtros opcionales."
+
+#: importers.py
+msgid ""
+"List the importers installed on the server.\n"
+"\n"
+"Plugins such as YouTube (kidsplay-importer-ytdlp) appear only when\n"
+"installed on the server."
+msgstr ""
+"Muestra los importadores instalados en el servidor.\n"
+"\n"
+"Los complementos como YouTube (kidsplay-importer-ytdlp) solo aparecen\n"
+"cuando están instalados en el servidor."
+
+#: devices.py media.py
+msgid "Log in first with [bold]kidsplay auth login[/bold]."
+msgstr "Primero inicia sesión con [bold]kidsplay auth login[/bold]."
+
+#: auth.py
+msgid "Log in to the server's admin API."
+msgstr "Inicia sesión en la API de administración del servidor."
+
+#: devices.py
+msgid "Loudest the device may play, in percent."
+msgstr "Volumen máximo al que puede reproducir el dispositivo, en porcentaje."
+
+#: media.py
+#, python-brace-format
+msgid "Loudness backfill: {state}"
+msgstr "Normalización del catálogo existente: {state}"
+
+#: media.py
+msgid ""
+"Loudness-normalize existing audio on the server, in the background.\n"
+"\n"
+"Items already normalized to the current target are skipped, so running\n"
+"this again re-encodes nothing. Pass --all or one or more MEDIA_IDS."
+msgstr ""
+"Normaliza el volumen (sonoridad) del audio existente en el servidor, en segundo "
+"plano.\n"
+"\n"
+"Los elementos que ya están normalizados al objetivo actual se omiten, así que\n"
+"volver a ejecutarlo no recodifica nada. Indica --all o uno o más MEDIA_IDS."
+
+#: devices.py
+msgid "Manage child profiles."
+msgstr "Administra los perfiles de los niños."
+
+#: media.py
+msgid "Manage media items (music, audiobooks, photos)."
+msgstr "Administra los archivos multimedia (música, audiolibros, fotos)."
+
+#: devices.py
+msgid "Manage playback devices."
+msgstr "Administra los dispositivos de reproducción."
+
+#: devices.py
+msgid "Max volume"
+msgstr "Volumen máx."
+
+#: media.py
+msgid "Media type: music, audiobook, or photo."
+msgstr "Tipo de medio: music, audiobook o photo."
+
+#: devices.py
+msgid "Monday"
+msgstr "lunes"
+
+#: devices.py importers.py
+msgid "Name"
+msgstr "Nombre"
+
+#: media.py
+msgid "Normalize the whole audio library."
+msgstr "Normaliza toda la biblioteca de audio."
+
+#: auth.py
+#, python-brace-format
+msgid "Not logged in to {server}. Run [bold]kidsplay auth login[/bold]."
+msgstr "No has iniciado sesión en {server}. Ejecuta [bold]kidsplay auth login[/bold]."
+
+#: devices.py
+msgid "Path on the device for the local SQLite database."
+msgstr "Ruta en el dispositivo para la base de datos SQLite local."
+
+#: devices.py
+msgid "Path on the device where synced media will be stored."
+msgstr "Ruta en el dispositivo donde se guardarán los medios sincronizados."
+
+#: devices.py
+msgid "Play a short sound when a button is pressed (on by default)."
+msgstr "Reproduce un sonido corto al pulsar un botón (activado por defecto)."
+
+#: media.py
+msgid "Playlist"
+msgstr "Lista de reproducción"
+
+#: media.py
+msgid "Playlist/album name. Defaults to the directory name."
+msgstr "Nombre de la lista de reproducción o álbum. Por omisión, el nombre del directorio."
+
+#: importers.py
+msgid "Preview"
+msgstr "Vista previa"
+
+#: devices.py
+msgid "Profile ID"
+msgstr "ID de perfil"
+
+#: media.py
+msgid "Profile UUID to assign ingested media to. Repeatable."
+msgstr "UUID del perfil al que se asignarán los medios importados. Se puede repetir."
+
+#: devices.py
+msgid "Profile UUID to link. Required when registering a new device."
+msgstr "UUID del perfil que se vinculará. Obligatorio al registrar un dispositivo nuevo."
+
+#: devices.py
+msgid "Profile settings"
+msgstr "Configuración del perfil"
+
+#: devices.py
+msgid "Profiles"
+msgstr "Perfiles"
+
+#: importers.py
+msgid "Queued"
+msgstr "En cola"
+
+#: devices.py
+msgid "Register a new device with NAME."
+msgstr "Registra un dispositivo nuevo con NAME."
+
+#: media.py
+msgid "Remove the assignment of MEDIA_ID from PROFILE_ID."
+msgstr "Quita la asignación de MEDIA_ID a PROFILE_ID."
+
+#: devices.py
+msgid "Remove the bedtime for DAYS (same syntax as --bedtime). Repeatable."
+msgstr "Quita la hora de dormir de DAYS (misma sintaxis que --bedtime). Se puede repetir."
+
+#: auth.py
+msgid "Revoke the saved token on the server and delete it locally."
+msgstr "Revoca el token guardado en el servidor y lo elimina localmente."
+
+#: devices.py
+msgid "Saturday"
+msgstr "sábado"
+
+#: devices.py
+msgid ""
+"Screen height in pixels. Registered for a new device, and written to the config when "
+"it is not 480."
+msgstr ""
+"Alto de pantalla en píxeles. Se registra en un dispositivo nuevo y se escribe en la "
+"configuración si no es 480."
+
+#: devices.py
+msgid "Screen height px."
+msgstr "Alto de pantalla en px."
+
+#: devices.py
+msgid ""
+"Screen width in pixels. Registered for a new device, and written to the config when "
+"it is not 640."
+msgstr ""
+"Ancho de pantalla en píxeles. Se registra en un dispositivo nuevo y se escribe en la "
+"configuración si no es 640."
+
+#: devices.py
+msgid "Screen width px."
+msgstr "Ancho de pantalla en px."
+
+#: media.py
+msgid "Search title/artist/playlist."
+msgstr "Busca por título, artista o lista de reproducción."
+
+#: devices.py
+msgid "Seconds between background sync attempts."
+msgstr "Segundos entre intentos de sincronización en segundo plano."
+
+#: main.py
+msgid "Server base URL. Overrides the KIDSPLAY_SERVER environment variable."
+msgstr "URL base del servidor. Tiene prioridad sobre la variable de entorno KIDSPLAY_SERVER."
+
+#: devices.py
+msgid ""
+"Set bedtime and wake time, e.g. weekdays=20:00-07:00 or fri,sat=21:00-08:30. DAYS: "
+"mon..sun, weekdays, weekend, all. Repeatable."
+msgstr ""
+"Define la hora de dormir y la de despertar, p. ej. weekdays=20:00-07:00 o "
+"fri,sat=21:00-08:30. DAYS: mon..sun, weekdays, weekend, all. Se puede repetir."
+
+#: devices.py
+msgid "Setting"
+msgstr "Ajuste"
+
+#: media.py
+msgid "Show backfill progress only."
+msgstr "Muestra solo el avance del procesamiento del catálogo existente."
+
+#: media.py
+msgid "Show details for a single media item."
+msgstr "Muestra los detalles de un archivo multimedia."
+
+#: devices.py
+msgid ""
+"Show or change the settings of profile PROFILE_ID.\n"
+"\n"
+"Without options, prints the current settings. With options, changes\n"
+"only what is given and prints the result. Devices pick changes up at\n"
+"their next sync."
+msgstr ""
+"Muestra o modifica la configuración del perfil PROFILE_ID.\n"
+"\n"
+"Sin opciones, muestra la configuración actual. Con opciones, cambia\n"
+"solo lo indicado y muestra el resultado. Los dispositivos recogen los\n"
+"cambios en su próxima sincronización."
+
+#: auth.py
+msgid "Show whether the CLI can use the server's admin API."
+msgstr "Muestra si la CLI puede usar la API de administración del servidor."
+
+#: media.py
+msgid "Status"
+msgstr "Estado"
+
+#: devices.py
+msgid "Sunday"
+msgstr "domingo"
+
+#: devices.py
+msgid "Thursday"
+msgstr "jueves"
+
+#: media.py
+msgid "Title"
+msgstr "Título"
+
+#: devices.py
+msgid "Tuesday"
+msgstr "martes"
+
+#: media.py
+msgid "Type"
+msgstr "Tipo"
+
+#: devices.py
+msgid "UUID of an already-registered device. Use instead of --name/--profile."
+msgstr "UUID de un dispositivo ya registrado. Úsalo en lugar de --name/--profile."
+
+#: devices.py
+msgid "UUID of the child's profile to link to this device."
+msgstr "UUID del perfil del niño que se vinculará a este dispositivo."
+
+#: devices.py
+msgid "Unregister the device with DEVICE_ID."
+msgstr "Da de baja el dispositivo con DEVICE_ID."
+
+#: devices.py
+msgid "Value"
+msgstr "Valor"
+
+#: devices.py
+msgid "Volume buttons"
+msgstr "Botones de volumen"
+
+#: media.py
+msgid "Wait until the backfill finishes."
+msgstr "Espera hasta que termine el procesamiento del catálogo existente."
+
+#: devices.py
+msgid "Wednesday"
+msgstr "miércoles"
+
+#: devices.py
+msgid "What the device does during bedtime."
+msgstr "Qué hace el dispositivo durante la hora de dormir."
+
+#: devices.py
+msgid "Write config JSON to this file instead of printing to stdout."
+msgstr ""
+"Escribe el JSON de configuración en este archivo en lugar de imprimirlo en la salida "
+"estándar."
+
+#: devices.py
+msgid "[bold red]Error:[/bold red] --api-key is required with --device-id."
+msgstr "[bold red]Error:[/bold red] --api-key es obligatoria con --device-id."
+
+#: devices.py
+msgid "[bold red]Error:[/bold red] --name and --profile are not used with --device-id."
+msgstr "[bold red]Error:[/bold red] --name y --profile no se usan con --device-id."
+
+#: devices.py
+msgid ""
+"[bold red]Error:[/bold red] Provide either --name + --profile (new device) or "
+"--device-id + --api-key (existing device)."
+msgstr ""
+"[bold red]Error:[/bold red] Indica --name + --profile (dispositivo nuevo) o --device-"
+"id + --api-key (dispositivo existente)."
+
+#: auth.py devices.py importers.py media.py
+#, python-brace-format
+msgid "[bold red]Error:[/bold red] {msg}"
+msgstr "[bold red]Error:[/bold red] {msg}"
+
+#: devices.py
+msgid "[dim]No devices found.[/dim]"
+msgstr "[dim]No se encontraron dispositivos.[/dim]"
+
+#: media.py
+msgid "[dim]No media found.[/dim]"
+msgstr "[dim]No se encontraron medios.[/dim]"
+
+#: devices.py
+msgid "[dim]No profiles found.[/dim]"
+msgstr "[dim]No se encontraron perfiles.[/dim]"
+
+#: auth.py
+#, python-brace-format
+msgid "[dim]Not logged in to {server}.[/dim]"
+msgstr "[dim]No has iniciado sesión en {server}.[/dim]"
+
+#: media.py
+#, python-brace-format
+msgid "[dim]Showing {limit} results. Use --offset to paginate.[/dim]"
+msgstr "[dim]Se muestran {limit} resultados. Usa --offset para paginar.[/dim]"
+
+#: devices.py
+msgid "[dim]none[/dim]"
+msgstr "[dim]ninguno[/dim]"
+
+#: media.py
+msgid "[dim]not normalized[/dim]"
+msgstr "[dim]sin normalizar[/dim]"
+
+#: media.py
+msgid "[dim]pending[/dim]"
+msgstr "[dim]pendiente[/dim]"
+
+#: media.py
+#, python-brace-format
+msgid "[dim]{count} skipped (duplicate)[/dim]"
+msgstr "[dim]{count} omitidos (duplicados)[/dim]"
+
+#: media.py
+#, python-brace-format
+msgid "[green]Assigned[/green] [dim]{media_id}[/dim] → [dim]{profile_id}[/dim]"
+msgstr "[green]Asignado[/green] [dim]{media_id}[/dim] → [dim]{profile_id}[/dim]"
+
+#: auth.py
+#, python-brace-format
+msgid "[green]Authenticated[/green] to {server} with an API token."
+msgstr "[green]Autenticado[/green] en {server} con un token de la API."
+
+#: devices.py
+#, python-brace-format
+msgid "[green]Config written to[/green] {dest}"
+msgstr "[green]Configuración escrita en[/green] {dest}"
+
+#: devices.py
+#, python-brace-format
+msgid "[green]Created profile[/green] [bold]{name}[/bold] [dim]({id})[/dim]"
+msgstr "[green]Perfil creado[/green] [bold]{name}[/bold] [dim]({id})[/dim]"
+
+#: devices.py
+#, python-brace-format
+msgid "[green]Deleted device[/green] [dim]{device_id}[/dim]"
+msgstr "[green]Dispositivo eliminado[/green] [dim]{device_id}[/dim]"
+
+#: devices.py
+#, python-brace-format
+msgid "[green]Deleted profile[/green] [dim]{profile_id}[/dim]"
+msgstr "[green]Perfil eliminado[/green] [dim]{profile_id}[/dim]"
+
+#: media.py
+#, python-brace-format
+msgid "[green]Deleted[/green] [dim]{media_id}[/dim]"
+msgstr "[green]Eliminado[/green] [dim]{media_id}[/dim]"
+
+#: auth.py
+#, python-brace-format
+msgid "[green]Logged in to[/green] {server} [dim](token '{name}' saved to {path})[/dim]"
+msgstr ""
+"[green]Sesión iniciada en[/green] {server} [dim](token '{name}' guardado en "
+"{path})[/dim]"
+
+#: auth.py
+#, python-brace-format
+msgid "[green]Logged out of[/green] {server}"
+msgstr "[green]Sesión cerrada en[/green] {server}"
+
+#: devices.py
+#, python-brace-format
+msgid "[green]Registered device[/green] [bold]{name}[/bold] [dim]({id})[/dim]"
+msgstr "[green]Dispositivo registrado[/green] [bold]{name}[/bold] [dim]({id})[/dim]"
+
+#: devices.py
+#, python-brace-format
+msgid ""
+"[green]Registered device[/green] [bold]{name}[/bold] [dim]({id})[/dim]\n"
+"  api_key: [dim]{api_key}[/dim]"
+msgstr ""
+"[green]Dispositivo registrado[/green] [bold]{name}[/bold] [dim]({id})[/dim]\n"
+"  api_key: [dim]{api_key}[/dim]"
+
+#: media.py
+#, python-brace-format
+msgid "[green]Unassigned[/green] [dim]{media_id}[/dim] from [dim]{profile_id}[/dim]"
+msgstr "[green]Se quitó[/green] [dim]{media_id}[/dim] de [dim]{profile_id}[/dim]"
+
+#: devices.py
+msgid "[green]Updated profile settings.[/green]"
+msgstr "[green]Configuración del perfil actualizada.[/green]"
+
+#: media.py
+msgid "[green]ready[/green]"
+msgstr "[green]listo[/green]"
+
+#: media.py
+#, python-brace-format
+msgid "[green]{count} ingested[/green]"
+msgstr "[green]{count} importados[/green]"
+
+#: media.py
+msgid "[red]failed[/red]"
+msgstr "[red]con error[/red]"
+
+#: media.py
+#, python-brace-format
+msgid "[red]{count} failed[/red]"
+msgstr "[red]{count} con error[/red]"
+
+#: media.py
+msgid "[yellow]No supported files found.[/yellow]"
+msgstr "[yellow]No se encontraron archivos compatibles.[/yellow]"
+
+#: auth.py
+#, python-brace-format
+msgid "[yellow]Warning:[/yellow] could not revoke token on server: {detail}"
+msgstr "[yellow]Advertencia:[/yellow] no se pudo revocar el token en el servidor: {detail}"
+
+#: media.py
+msgid "[yellow]processing[/yellow]"
+msgstr "[yellow]procesando[/yellow]"
+
+#: media.py
+msgid "audiobook"
+msgstr "audiolibro"
+
+#: devices.py
+msgid "audiobooks only"
+msgstr "solo audiolibros"
+
+#: devices.py
+msgid "device default"
+msgstr "predeterminado del dispositivo"
+
+#: media.py
+msgid "finished"
+msgstr "terminado"
+
+#: media.py
+msgid "music"
+msgstr "música"
+
+#: devices.py
+msgid "never"
+msgstr "nunca"
+
+#: importers.py
+msgid "no"
+msgstr "no"
+
+#: media.py
+msgid "not run since the server started"
+msgstr "no se ha ejecutado desde que se inició el servidor"
+
+#: devices.py
+msgid "off"
+msgstr "desactivado"
+
+#: devices.py
+msgid "off — no restrictions"
+msgstr "desactivado — sin restricciones"
+
+#: devices.py
+msgid "on"
+msgstr "activado"
+
+#: media.py
+msgid "photo"
+msgstr "foto"
+
+#: media.py
+msgid "running"
+msgstr "en ejecución"
+
+#: devices.py
+msgid "sleep screen — no playback"
+msgstr "pantalla de hora de dormir — sin reproducción"
+
+#: media.py
+msgid "too quiet to measure, kept unchanged"
+msgstr "demasiado silencioso para medirlo; se dejó sin cambios"
+
+#: devices.py
+#, python-brace-format
+msgid "unknown day {part!r}; use mon..sun, weekdays, weekend or all"
+msgstr "día desconocido {part!r}; usa mon..sun, weekdays, weekend o all"
+
+#: i18n.py
+#, python-brace-format
+msgid "unsupported language {language!r}; use one of: {supported}"
+msgstr "idioma no admitido {language!r}; usa uno de: {supported}"
+
+#: importers.py
+msgid "yes"
+msgstr "sí"
+
+#: auth.py
+#, python-brace-format
+msgid "{server} has admin authentication [bold]disabled[/bold]."
+msgstr "{server} tiene la autenticación de administrador [bold]desactivada[/bold]."
+
+#: media.py
+#, python-brace-format
+msgid ""
+"{source:.1f} LUFS → {output:.1f} LUFS ({gain:+.1f} dB, kept below the {target:g} LUFS"
+" target to avoid limiting)"
+msgstr ""
+"{source:.1f} LUFS → {output:.1f} LUFS ({gain:+.1f} dB, por debajo del objetivo de "
+"{target:g} LUFS para no limitar)"
+
+#: media.py
+#, python-brace-format
+msgid "{source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB)"
+msgstr "{source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB)"
+
+#: media.py
+#, python-brace-format
+msgid "{source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB, loud peaks limited)"
+msgstr "{source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB, picos fuertes limitados)"
+
+#: devices.py
+#, python-brace-format
+msgid "{spec!r}: expected DAYS=BEDTIME-WAKE, e.g. weekdays=20:00-07:00"
+msgstr "{spec!r}: se esperaba DAYS=BEDTIME-WAKE, p. ej. weekdays=20:00-07:00"
+
+#: devices.py
+#, python-brace-format
+msgid ""
+"{spec!r}: times must be local HH:MM (no timezone offset) and bedtime must differ from"
+" wake"
+msgstr ""
+"{spec!r}: las horas deben ser locales en formato HH:MM (sin desfase de zona horaria) "
+"y la hora de dormir debe ser distinta de la de despertar"
+
+#~ msgid "Screen height in pixels (new devices only)."
+#~ msgstr "Alto de pantalla en píxeles (solo dispositivos nuevos)."
+
+#~ msgid "Screen width in pixels (new devices only)."
+#~ msgstr "Ancho de pantalla en píxeles (solo dispositivos nuevos)."
+

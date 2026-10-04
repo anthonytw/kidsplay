@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Import Queue') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{% trans %}Import Queue{% endtrans %}</h1>
+  <div style="display:flex; gap:0.5rem; align-items:center;">
+    <select id="queue-filter" onchange="refreshQueue()" style="width:140px; font-size:0.83rem;">
+      <option value="">{% trans %}All{% endtrans %}</option>
+      <option value="pending">{% trans %}Pending{% endtrans %}</option>
+      <option value="running">{% trans %}Running{% endtrans %}</option>
+      <option value="completed">{% trans %}Completed{% endtrans %}</option>
+      <option value="failed">{% trans %}Failed{% endtrans %}</option>
+    </select>
+    <a href="/media/import" class="btn btn-primary">{% trans %}+ New Import{% endtrans %}</a>
+  </div>
+</div>
+
+<div id="queue-list">
+  <p style="color:#888; font-size:0.88rem;">{% trans %}Loading…{% endtrans %}</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  .q-item {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+    margin-bottom: 0.75rem;
+  }
+
+  .q-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .q-title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    word-break: break-all;
+  }
+
+  .q-meta {
+    font-size: 0.78rem;
+    color: #666;
+    margin-top: 0.3rem;
+  }
+
+  .q-meta span {
+    margin-right: 0.75rem;
+  }
+
+  .q-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .q-status {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .q-status-pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .q-status-running {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+
+  .q-status-completed {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .q-status-failed {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .q-status-cancelled {
+    background: #e8e8f0;
+    color: #666;
+  }
+
+  .q-error {
+    background: #fff5f5;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.83rem;
+    color: #721c24;
+  }
+
+  .q-log {
+    margin-top: 0.5rem;
+  }
+
+  .q-log summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #666;
+    user-select: none;
+  }
+
+  .q-log pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 400px;
+    overflow-y: auto;
+    background: #f7f7fa;
+    border: 1px solid #e0e0e8;
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #333;
+  }
+
+  .q-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #888;
+  }
+
+  .q-refresh-note {
+    font-size: 0.75rem;
+    color: #aaa;
+    text-align: right;
+    margin-top: 0.5rem;
+  }
+</style>
+
+<script>
+  const T = {
+    retry: {{ _('Retry')|tojson }},
+    delete: {{ _('Delete')|tojson }},
+    error: {{ _('Error:')|tojson }},
+    logSummary: {{ _('Show full log ({attempt}/{max} attempts)')|tojson }},
+    viewLibrary: {{ _('View in library')|tojson }},
+    created: {{ _('Created: {time}')|tojson }},
+    completed: {{ _('Completed: {time}')|tojson }},
+    attemptOf: {{ _('Attempt {attempt} of {max}')|tojson }},
+    willRetry: {{ _('Will retry (attempt {attempt} of {max})')|tojson }},
+    empty: {{ _('No items in queue.')|tojson }},
+    importMedia: {{ _('Import media')|tojson }},
+    confirmDelete: {{ _('Delete this queue item?')|tojson }},
+    mediaType: {
+      music: {{ _('Music')|tojson }},
+      audiobook: {{ _('Audiobook')|tojson }},
+      photo: {{ _('Photo')|tojson }},
+    },
+    status: {
+      pending: {{ _('Pending')|tojson }},
+      running: {{ _('Running')|tojson }},
+      completed: {{ _('Completed')|tojson }},
+      failed: {{ _('Failed')|tojson }},
+      cancelled: {{ _('Cancelled')|tojson }},
+    },
+  };
+
+  function fmtMsg(msg, vals) {
+    return msg.replace(/\{(\w+)\}/g, (m, k) => (k in vals ? vals[k] : m));
+  }
+
+  let refreshTimer = null;
+
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  function statusClass(s) {
+    return 'q-status q-status-' + s;
+  }
+
+  function renderItem(item) {
+    const title = item.title_override || item.url;
+    const subtitle = item.playlist_title + (item.artist_override ? ' — ' + item.artist_override : '');
+
+    let actions = '';
+    if (item.status === 'failed' || item.status === 'cancelled') {
+      actions += '<button class="btn btn-secondary btn-sm" onclick="retryItem(\'' + item.id + '\')">' + T.retry + '</button>';
+    }
+    if (item.status !== 'running') {
+      actions += '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'' + item.id + '\')">' + T.delete + '</button>';
+    }
+
+    let errorHtml = '';
+    if (item.last_error) {
+      errorHtml = '<div class="q-error"><strong>' + T.error + '</strong> ' + escH(item.last_error) + '</div>';
+    }
+
+    let logHtml = '';
+    if (item.log) {
+      logHtml = '<details class="q-log"><summary>' + fmtMsg(T.logSummary, {attempt: item.attempt, max: item.max_retries}) + '</summary><pre>' + escH(item.log) + '</pre></details>';
+    }
+
+    let mediaLink = '';
+    if (item.status === 'completed' && item.media_id) {
+      mediaLink = ' <a href="/media?q=' + encodeURIComponent(item.title_override || item.playlist_title || '') + '" class="btn btn-secondary btn-sm" style="margin-left:0.4rem;">' + T.viewLibrary + '</a>';
+    }
+
+    return '<div class="q-item" id="q-' + item.id + '">' +
+      '<div class="q-header">' +
+      '<div style="flex:1;min-width:0;">' +
+      '<div class="q-title">' + escH(title) + '</div>' +
+      '<div class="q-meta">' +
+      '<span>' + escH(T.mediaType[item.media_type] || item.media_type) + '</span>' +
+      '<span>' + escH(subtitle) + '</span>' +
+      '</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:0.5rem;">' +
+      '<span class="' + statusClass(item.status) + '">' + (T.status[item.status] || item.status) + '</span>' +
+      mediaLink +
+      '</div>' +
+      '</div>' +
+      '<div class="q-meta" style="margin-top:0.4rem;">' +
+      '<span>' + fmtMsg(T.created, {time: fmtTime(item.created_at)}) + '</span>' +
+      (item.completed_at ? '<span>' + fmtMsg(T.completed, {time: fmtTime(item.completed_at)}) + '</span>' : '') +
+      (item.status === 'running' ? '<span>' + fmtMsg(T.attemptOf, {attempt: item.attempt, max: item.max_retries}) + '</span>' : '') +
+      (item.status === 'pending' && item.attempt > 0 ? '<span>' + fmtMsg(T.willRetry, {attempt: item.attempt + 1, max: item.max_retries}) + '</span>' : '') +
+      '</div>' +
+      errorHtml +
+      logHtml +
+      '<div class="q-actions" style="margin-top:0.5rem;">' + actions + '</div>' +
+      '</div>';
+  }
+
+  function escH(s) {
+    if (!s) return '';
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  async function refreshQueue() {
+    const filter = document.getElementById('queue-filter').value;
+    const qs = filter ? '?status=' + filter : '';
+    try {
+      const resp = await fetch('/api/v1/queue' + qs);
+      if (!resp.ok) return;
+      const items = await resp.json();
+      const container = document.getElementById('queue-list');
+
+      // Preserve open state of any expanded log <details> elements.
+      const openIds = new Set();
+      container.querySelectorAll('details.q-log[open]').forEach(el => {
+        const item = el.closest('[id^="q-"]');
+        if (item) openIds.add(item.id);
+      });
+
+      if (items.length === 0) {
+        container.innerHTML = '<div class="q-empty"><p>' + T.empty + '</p><p style="margin-top:0.5rem;"><a href="/media/import" class="btn btn-primary">' + T.importMedia + '</a></p></div>';
+      } else {
+        container.innerHTML = items.map(renderItem).join('');
+      }
+
+      // Re-open any details that were open before the refresh.
+      openIds.forEach(id => {
+        const details = container.querySelector('#' + id + ' details.q-log');
+        if (details) details.open = true;
+      });
+    } catch (e) {
+      // Silently skip on network error — will retry on next poll.
+    }
+  }
+
+  async function retryItem(id) {
+    await fetch('/api/v1/queue/' + id + '/retry', { method: 'POST' });
+    refreshQueue();
+  }
+
+  async function deleteItem(id) {
+    if (!confirm(T.confirmDelete)) return;
+    await fetch('/api/v1/queue/' + id, { method: 'DELETE' });
+    refreshQueue();
+  }
+
+  // Initial load + auto-refresh every 10 seconds.
+  refreshQueue();
+  refreshTimer = setInterval(refreshQueue, 10000);
+</script>
+{% endblock %}

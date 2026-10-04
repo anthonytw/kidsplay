@@ -1,0 +1,249 @@
+# Translations for kidsplay_device.
+# Copyright (C) KidsPlay contributors
+# This file is distributed under the same license as the KidsPlay project.
+msgid ""
+msgstr ""
+"Project-Id-Version: kidsplay_device 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/anthonytw/kidsplay/issues\n"
+"POT-Creation-Date: 2026-01-01 00:00+0000\n"
+"PO-Revision-Date: 2026-01-01 00:00+0000\n"
+"Last-Translator: KidsPlay contributors\n"
+"Language: es\n"
+"Language-Team: KidsPlay contributors\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: pairing_screen.py
+msgid "All set! Starting…"
+msgstr "¡Listo! Iniciando…"
+
+#: views.py
+msgid "Audiobooks"
+msgstr "Audiolibros"
+
+#: pairing_screen.py views.py
+msgid "Back"
+msgstr "Volver"
+
+#: views.py
+msgid "Bedtime"
+msgstr "Hora de dormir"
+
+#: views.py
+msgid "Blue"
+msgstr "Azul"
+
+#: pairing_screen.py
+msgid "Change server"
+msgstr "Cambiar servidor"
+
+#: views.py
+msgid "Change theme"
+msgstr "Cambiar tema"
+
+#: pairing_screen.py
+msgid "Choose"
+msgstr "Elegir"
+
+#: views.py
+msgid "Color Theme"
+msgstr "Tema de Color"
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Connecting to {url}…"
+msgstr "Conectando con {url}…"
+
+#: views.py
+msgid "Contrast"
+msgstr "Contraste"
+
+#: pairing_screen.py
+msgid "Couldn't reach the server."
+msgstr "No se pudo conectar con el servidor."
+
+#: pairing_screen.py
+msgid "Couldn't save the settings on this player."
+msgstr "No se pudo guardar la configuración en este reproductor."
+
+#: views.py
+msgid "Cyan"
+msgstr "Cian"
+
+#: keyboard.py
+msgid "Del"
+msgstr "Borrar"
+
+#: pairing_screen.py
+msgid "Delete"
+msgstr "Borrar"
+
+#: pairing_screen.py
+msgid "Done"
+msgstr "Listo"
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Expires in {time}"
+msgstr "Vence en {time}"
+
+#: views.py
+msgid "Green"
+msgstr "Verde"
+
+#: pairing_screen.py
+msgid "Keys"
+msgstr "Teclas"
+
+#: pairing_screen.py
+msgid "Looking for a server on your network…"
+msgstr "Buscando un servidor en tu red…"
+
+#: views.py
+msgid "Music"
+msgstr "Música"
+
+#: views.py
+msgid "Night"
+msgstr "Noche"
+
+#: views.py
+msgid "Nothing playing"
+msgstr "Nada en reproducción"
+
+#: keyboard.py
+msgid "OK"
+msgstr "Listo"
+
+#: views.py
+msgid "Orange"
+msgstr "Naranja"
+
+#: pairing_screen.py
+msgid "Pairing is turned off on the server."
+msgstr "La vinculación está desactivada en el servidor."
+
+#: views.py
+msgid "Photos"
+msgstr "Fotos"
+
+#: pairing_screen.py
+msgid "Pick only a server you recognize. Anyone on the network can announce one."
+msgstr "Elige solo un servidor que reconozcas. Cualquiera en la red puede anunciar uno."
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Preset: {address}"
+msgstr "Preestablecido: {address}"
+
+#: views.py
+msgid "Purple"
+msgstr "Morado"
+
+#: views.py
+msgid "Red"
+msgstr "Rojo"
+
+#: views.py
+msgid "Repeat All"
+msgstr "Repetir todo"
+
+#: views.py
+msgid "Repeat One"
+msgstr "Repetir esta"
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Scan the picture with a phone, or open {url} and type this code."
+msgstr "Escanea la imagen con un teléfono, o abre {url} y escribe este código."
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Server ID: {id}. The approval page shows the same ID."
+msgstr "ID del servidor: {id}. La página de aprobación muestra el mismo ID."
+
+#: pairing_screen.py
+msgid "Server address"
+msgstr "Dirección del servidor"
+
+#: pairing_screen.py
+msgid "Set up this player"
+msgstr "Configurar este reproductor"
+
+#: views.py
+msgid "Settings"
+msgstr "Ajustes"
+
+#: pairing_screen.py
+msgid "Something went wrong."
+msgstr "Algo salió mal."
+
+#: pairing_screen.py
+msgid "That doesn't look like an address."
+msgstr "Eso no parece una dirección."
+
+#: pairing_screen.py
+msgid "That isn't the server you chose. Check the address."
+msgstr "Ese no es el servidor que elegiste. Revisa la dirección."
+
+#: pairing_screen.py
+msgid "The request was declined."
+msgstr "Se rechazó la solicitud."
+
+#: pairing_screen.py
+msgid "The server is busy. Try again in a minute."
+msgstr "El servidor está ocupado. Inténtalo en un minuto."
+
+#: views.py
+msgid "Theme chosen by your parents"
+msgstr "Tema elegido por tus padres"
+
+#: pairing_screen.py
+msgid "This code has expired."
+msgstr "Este código venció."
+
+#: pairing_screen.py
+msgid "This code was already used."
+msgstr "Este código ya se usó."
+
+#: pairing_screen.py
+msgid "Try again"
+msgstr "Reintentar"
+
+#: pairing_screen.py
+msgid "Type"
+msgstr "Escribir"
+
+#: pairing_screen.py
+msgid "Type the address…"
+msgstr "Escribir la dirección…"
+
+#: views.py
+msgid "Unknown server. Ask a grown-up."
+msgstr "Servidor desconocido. Avisa a un adulto."
+
+#: views.py
+#, python-brace-format
+msgid "Until 01:{minute}"
+msgid_plural "Until {hour}:{minute}"
+msgstr[0] "Hasta la 1:{minute}"
+msgstr[1] "Hasta las {hour}:{minute}"
+
+#: app.py
+#, python-brace-format
+msgid "Volume {percent}%"
+msgstr "Volumen {percent}%"
+
+#: pairing_screen.py
+msgid "Which KidsPlay server should it connect to?"
+msgstr "¿A qué servidor de KidsPlay debe conectarse?"
+
+#~ msgid "Found: {url}"
+#~ msgstr "Encontrado: {url}"
+
+#~ msgid "abc / 123"
+#~ msgstr "abc / 123"
+

@@ -1,0 +1,100 @@
+name: Device (arm64 Debian)
+
+# Tier 2 of the verification policy (issue #13): the device package on the
+# handhelds' platform, Raspberry Pi OS = Debian bookworm, arm64, with no
+# hardware. Catches missing aarch64 wheels, packages falling back to a source
+# build, the Python version (bookworm ships 3.11; the project needs 3.12+, which
+# uv must fetch as it does on a handheld), and a player that cannot start or
+# play headless.
+#
+# Not a required check: it runs nightly and on changes that can affect the
+# handhelds, not on every PR. Make it required once it has been stable a while.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  pull_request:
+    paths:
+      - "packages/kidsplay-device/**"
+      - "packages/kidsplay-models/**"
+      - "uv.lock"
+      - "justfile"
+      - "demo/device_shots.py"
+      - ".github/workflows/arm64-device.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arm64-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.8.17"
+
+jobs:
+  device:
+    # GitHub's native arm64 runner; the container makes it Debian bookworm.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    container:
+      image: debian:bookworm
+    steps:
+      - name: Install system packages
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates curl git ffmpeg python3
+          echo "arch: $(uname -m)"
+          cat /etc/os-release | head -2
+          python3 --version   # bookworm's own Python, like Pi OS: older than the project needs
+
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        run: |
+          curl -LsSf "https://astral.sh/uv/${UV_VERSION}/install.sh" | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # What `just device-update` runs on a handheld. A third-party package
+      # with no aarch64 wheel would be compiled from source: uv reports that as
+      # "Building <name>", which fails the job (the workspace's own kidsplay-*
+      # packages are always built locally, so they are exempt).
+      - name: Device install path
+        shell: bash -eo pipefail {0}
+        run: |
+          uv sync --package kidsplay-device --locked 2>&1 | tee "$RUNNER_TEMP/sync.log"
+          if grep -E "Building " "$RUNNER_TEMP/sync.log" | grep -v "kidsplay"; then
+            echo "::error::a package was built from source (no aarch64 wheel)"; exit 1
+          fi
+          uv run --package kidsplay-device python -c "
+          import sys, platform
+          import kidsplay_device, pygame
+          print(sys.version, platform.machine(), pygame.version.ver)
+          assert sys.version_info >= (3, 12), 'uv gave the device an old Python'
+          assert platform.machine() == 'aarch64'
+          "
+          test -x .venv/bin/kidsplay-player
+
+      - name: Install everything (tests need the server and dev tools)
+        shell: bash -eo pipefail {0}
+        run: |
+          uv sync --all-packages --locked 2>&1 | tee "$RUNNER_TEMP/sync-all.log"
+          if grep -E "Building " "$RUNNER_TEMP/sync-all.log" | grep -v "kidsplay"; then
+            echo "::error::a package was built from source (no aarch64 wheel)"; exit 1
+          fi
+
+      # Includes the disk-audio tests (volume cap, fade) and the kiosk
+      # installer tests, on arm64.
+      - name: Device and models tests
+        run: uv run pytest packages/kidsplay-device packages/kidsplay-models
+
+      # The real player against a seeded server, headless, one frame per key
+      # press (demo/device_shots.py). A crash on start-up fails the job.
+      - name: Headless player frames
+        run: uv run --all-packages python -m demo.screenshots --skip-web --out "$RUNNER_TEMP/shots"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: device-frames-arm64
+          path: ${{ runner.temp }}/shots

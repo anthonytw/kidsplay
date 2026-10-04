@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  # Branch pushes are covered by pull_request; running on both doubles every run.
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # The loudness-normalization tests run real ffmpeg on generated tones.
+      # (yt-dlp tests still mock their subprocess.)
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      # setup-uv publishes no floating major tag (no @v10), so pin the release.
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --all-packages --locked
+
+      # Headless Chromium for the phone-width web UI tests (Playwright).
+      # The browser is cached per Playwright version; system libraries are
+      # installed on every run (they are not part of the cache).
+      - name: Resolve Playwright version
+        id: playwright
+        run: |
+          version=$(uv run python -c "import importlib.metadata as m; print(m.version('playwright'))")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: uv run playwright install --with-deps chromium
+
+      - name: Install Chromium system libraries
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: uv run playwright install-deps chromium
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run ty check
+
+      # The runner has 4 vCPUs and most of the time is ffmpeg and headless
+      # Chromium, so run the tests in parallel. loadscope keeps each module (and
+      # class) on one worker, so a module-scoped server is started once rather
+      # than once per worker.
+      - name: Test
+        run: uv run pytest -n auto --dist loadscope

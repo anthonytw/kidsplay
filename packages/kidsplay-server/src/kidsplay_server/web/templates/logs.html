@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Logs') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{% trans %}Server Logs{% endtrans %}</h1>
+  <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+    <span id="conn-indicator" style="font-size:0.78rem;color:#888;">{% trans %}connecting…{% endtrans %}</span>
+    <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.83rem;cursor:pointer;margin:0;">
+      <input type="checkbox" id="autoscroll" checked> {% trans %}Auto-scroll{% endtrans %}
+    </label>
+    <button class="btn btn-secondary btn-sm" onclick="clearLogs()">{% trans %}Clear{% endtrans %}</button>
+  </div>
+</div>
+
+<!-- Level filter buttons -->
+<div style="display:flex;gap:0.4rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+  <span style="font-size:0.78rem;color:#666;align-self:center;">{% trans %}Show:{% endtrans %}</span>
+  <button class="level-btn active" data-level="DEBUG"    onclick="toggleLevel(this)" style="background:#e8e8f0;color:#555;">DEBUG</button>
+  <button class="level-btn active" data-level="INFO"     onclick="toggleLevel(this)" style="background:#d1ecf1;color:#0c5460;">INFO</button>
+  <button class="level-btn active" data-level="WARNING"  onclick="toggleLevel(this)" style="background:#fff3cd;color:#856404;">WARNING</button>
+  <button class="level-btn active" data-level="ERROR"    onclick="toggleLevel(this)" style="background:#f8d7da;color:#721c24;">ERROR</button>
+  <button class="level-btn active" data-level="CRITICAL" onclick="toggleLevel(this)" style="background:#721c24;color:#fff;">CRITICAL</button>
+</div>
+
+<!-- Log output -->
+<div id="log-container" style="
+  background:#0d1117; color:#c9d1d9;
+  font-family:monospace; font-size:0.78rem; line-height:1.55;
+  border-radius:6px; padding:0.75rem;
+  height:70vh; overflow-y:auto;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+">
+  <div id="log-lines"></div>
+</div>
+
+<style>
+  .level-btn {
+    padding: 0.2rem 0.6rem; border: none; border-radius: 3px;
+    cursor: pointer; font-size: 0.76rem; font-family: inherit;
+    opacity: 1; transition: opacity 120ms;
+  }
+  .level-btn:not(.active) { opacity: 0.35; }
+
+  .log-row { padding: 0.05rem 0; white-space: pre-wrap; word-break: break-all; }
+  .log-row.hidden { display: none; }
+
+  .lv-DEBUG    { color: #6e7681; }
+  .lv-INFO     { color: #c9d1d9; }
+  .lv-WARNING  { color: #e3b341; }
+  .lv-ERROR    { color: #f85149; }
+  .lv-CRITICAL { color: #ff7b72; font-weight: 700; }
+
+  .log-ts     { color: #484f58; margin-right: 0.4rem; white-space: nowrap; }
+  .log-lvl    { display: inline-block; width: 5.5rem; font-weight: 600; }
+  /* Never split a logger name across lines ("api.ap" / "p"); the message wraps. */
+  .log-name   { color: #58a6ff; margin-right: 0.5rem; white-space: nowrap; word-break: normal; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const T = {
+  live: {{ _('live')|tojson }},
+  disconnected: {{ _('disconnected — retrying…')|tojson }},
+};
+
+// Hidden levels set
+const hiddenLevels = new Set();
+
+// Toggle a level filter button and show/hide matching rows.
+function toggleLevel(btn) {
+  const level = btn.dataset.level;
+  if (hiddenLevels.has(level)) {
+    hiddenLevels.delete(level);
+    btn.classList.add('active');
+    document.querySelectorAll('.log-row[data-level="' + level + '"]')
+      .forEach(r => r.classList.remove('hidden'));
+  } else {
+    hiddenLevels.add(level);
+    btn.classList.remove('active');
+    document.querySelectorAll('.log-row[data-level="' + level + '"]')
+      .forEach(r => r.classList.add('hidden'));
+  }
+}
+
+function clearLogs() {
+  document.getElementById('log-lines').innerHTML = '';
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+}
+
+// Shorten logger name for display: keep last two segments.
+function shortName(name) {
+  const parts = name.split('.');
+  return parts.length > 2 ? parts.slice(-2).join('.') : name;
+}
+
+function appendEntry(entry) {
+  const container = document.getElementById('log-lines');
+  const row = document.createElement('div');
+  row.className = 'log-row lv-' + entry.level;
+  row.dataset.level = entry.level;
+  if (hiddenLevels.has(entry.level)) row.classList.add('hidden');
+
+  // Format: timestamp  LEVEL    logger.name  message
+  const ts   = entry.ts.replace('T', ' ').substring(0, 23);
+  const lvl  = entry.level.padEnd(8);
+  const name = shortName(entry.logger);
+  row.innerHTML =
+    '<span class="log-ts">' + escapeHtml(ts) + '</span>' +
+    '<span class="log-lvl lv-' + entry.level + '">' + lvl + '</span>' +
+    '<span class="log-name">' + escapeHtml(name) + '</span>' +
+    escapeHtml(entry.message);
+
+  container.appendChild(row);
+
+  // Auto-scroll if enabled.
+  const box = document.getElementById('log-container');
+  if (document.getElementById('autoscroll').checked) {
+    box.scrollTop = box.scrollHeight;
+  }
+}
+
+// Pre-populate from server-side snapshot.
+const snapshot = {{ recent_logs | tojson }};
+snapshot.forEach(entry => appendEntry(entry));
+
+// Connect SSE stream for live updates.
+const indicator = document.getElementById('conn-indicator');
+const es = new EventSource('/logs/stream');
+
+es.onopen = () => {
+  indicator.textContent = T.live;
+  indicator.style.color = '#3fb950';
+};
+
+es.onmessage = (evt) => {
+  try {
+    appendEntry(JSON.parse(evt.data));
+  } catch (e) { /* ignore malformed */ }
+};
+
+// The server ends the stream when the login no longer holds (logged out,
+// password changed, session expired): go to the login page.
+es.addEventListener('auth-expired', () => {
+  es.close();
+  window.location.href = '/login?next=/logs';
+});
+
+es.onerror = () => {
+  indicator.textContent = T.disconnected;
+  indicator.style.color = '#f85149';
+};
+</script>
+{% endblock %}

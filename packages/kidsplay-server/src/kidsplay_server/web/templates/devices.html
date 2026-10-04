@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Devices') }}{% endblock %}
+
+{% block content %}
+<h1>{% trans %}Devices{% endtrans %}</h1>
+
+{% include "_pairing.html" %}
+
+<div class="split">
+
+  <!-- Device list -->
+  <div class="split-main">
+    <table class="stack">
+      <thead>
+        <tr>
+          <th>{% trans %}Name{% endtrans %}</th>
+          <th>{% trans %}Profile{% endtrans %}</th>
+          <th>{% trans %}Last sync{% endtrans %}</th>
+          <th>{% trans %}API key{% endtrans %}</th>
+          <th style="width:70px;"></th>
+        </tr>
+      </thead>
+      <tbody id="device-list">
+      {% for d in devices %}
+        <tr id="device-{{ d.id }}">
+          <td><strong>{{ d.name }}</strong><br><span style="font-size:0.75rem; color:#aaa; font-family:monospace;">{{ d.id }}</span></td>
+          <td>{{ d.profile_name or '—' }}</td>
+          <td style="font-size:0.8rem; color:#666;">{{ d.last_sync_at or _('Never') }}</td>
+          <td>
+            <span class="reveal-key hidden" id="key-{{ d.id }}">{{ d.api_key }}</span>
+            <button class="btn btn-secondary btn-sm" onclick="toggleKey('{{ d.id }}')">{% trans %}Show key{% endtrans %}</button>
+          </td>
+          <td class="actions">
+            <button class="btn btn-danger btn-sm"
+              hx-delete="/api/v1/devices/{{ d.id }}"
+              hx-confirm="{% trans name=d.name %}Unregister device '{{ name }}'?{% endtrans %}"
+              hx-target="#device-{{ d.id }}"
+              hx-swap="outerHTML">{% trans %}Delete{% endtrans %}</button>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" style="text-align:center; color:#888; padding:1.5rem;">{% trans %}No devices registered.{% endtrans %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Register device form -->
+  <div class="split-side">
+    <div class="card">
+      <h2>{% trans %}Register device{% endtrans %}</h2>
+      <div id="device-create-result" class="hidden" style="margin-bottom:0.75rem;"></div>
+      <div class="field">
+        <label for="new-device-name">{% trans %}Device name{% endtrans %}</label>
+        <input type="text" id="new-device-name" placeholder="{{ _('e.g. Leo\'s Player') }}">
+      </div>
+      <div class="field">
+        <label for="new-device-profile">{% trans %}Profile{% endtrans %}</label>
+        <select id="new-device-profile">
+          <option value="">{{ _('— None —') }}</option>
+          {% for p in profiles %}
+          <option value="{{ p.id }}">{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="createDevice()">{% trans %}Register{% endtrans %}</button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const T = {
+  none: {{ _('— None —')|tojson }},
+  enterName: {{ _('Enter a device name.')|tojson }},
+  never: {{ _('Never')|tojson }},
+  showKey: {{ _('Show key')|tojson }},
+  unregister: {{ _("Unregister device '{name}'?")|tojson }},
+  delete: {{ _('Delete')|tojson }},
+  registered: {{ _('✓ Device registered. API key: {key}')|tojson }},
+  error: {{ _('Error: {detail}')|tojson }},
+};
+
+function toggleKey(id) {
+  const span = document.getElementById('key-' + id);
+  span.classList.toggle('hidden');
+}
+
+async function createDevice() {
+  const name = document.getElementById('new-device-name').value.trim();
+  const profileId = document.getElementById('new-device-profile').value;
+  if (!name) { alert(T.enterName); return; }
+
+  const result = document.getElementById('device-create-result');
+  result.classList.add('hidden');
+
+  const body = {name, display_width: 640, display_height: 480};
+  if (profileId) body.profile_id = profileId;
+
+  const resp = await fetch('/api/v1/devices', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  const data = await resp.json();
+  if (resp.status === 201) {
+    const tbody = document.getElementById('device-list');
+    const empty = tbody.querySelector('td[colspan]');
+    if (empty) empty.closest('tr').remove();
+
+    // Find profile name
+    const profileSel = document.getElementById('new-device-profile');
+    const profileName = profileSel.options[profileSel.selectedIndex].text === T.none
+      ? '—' : profileSel.options[profileSel.selectedIndex].text;
+
+    const tr = document.createElement('tr');
+    tr.id = 'device-' + data.id;
+    tr.innerHTML =
+      '<td><strong>' + data.name + '</strong><br>' +
+        '<span style="font-size:.75rem;color:#aaa;font-family:monospace;">' + data.id + '</span></td>' +
+      '<td>' + profileName + '</td>' +
+      '<td style="font-size:.8rem;color:#666;">' + T.never + '</td>' +
+      '<td>' +
+        '<span class="reveal-key hidden" id="key-' + data.id + '">' + data.api_key + '</span>' +
+        '<button class="btn btn-secondary btn-sm" onclick="toggleKey(\'' + data.id + '\')">' + T.showKey + '</button>' +
+      '</td>' +
+      '<td class="actions">' +
+        '<button class="btn btn-danger btn-sm"' +
+        ' hx-delete="/api/v1/devices/' + data.id + '"' +
+        ' hx-confirm="' + T.unregister.replace('{name}', data.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;')) + '"' +
+        ' hx-target="#device-' + data.id + '"' +
+        ' hx-swap="outerHTML">' + T.delete + '</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+    htmx.process(tr);
+
+    document.getElementById('new-device-name').value = '';
+    result.className = 'alert alert-success';
+    result.textContent = T.registered.replace('{key}', data.api_key);
+    result.classList.remove('hidden');
+  } else {
+    result.className = 'alert alert-error';
+    result.textContent = T.error.replace('{detail}', apiDetail(data, resp.statusText));
+    result.classList.remove('hidden');
+  }
+}
+</script>
+{% endblock %}

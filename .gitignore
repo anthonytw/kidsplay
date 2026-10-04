@@ -1,0 +1,24 @@
+__pycache__/
+*.py[codz]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.db
+*.db-journal
+.DS_Store
+.env
+media-store/
+tmp/
+media_for_ingest/
+data/
+
+# Phone/desktop screenshot pass (just screenshots --mobile); not committed.
+screenshots-mobile/

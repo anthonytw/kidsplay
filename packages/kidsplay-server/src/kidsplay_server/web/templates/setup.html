@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Setup') }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:420px; margin:3rem auto;">
+  <h1>{{ _('Welcome to KidsPlay') }}</h1>
+  <p style="margin-bottom:1rem;">{% trans %}Choose an admin password. You will need it to manage media,
+    profiles and devices from this web UI or the <code>kidsplay</code> CLI.{% endtrans %}</p>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post" action="/setup">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label for="setup_code">{{ _('Setup code') }}</label>
+      <input type="text" id="setup_code" name="setup_code" autocomplete="off"
+        autocapitalize="characters" spellcheck="false" maxlength="64" required autofocus>
+      <small style="color:#888;">{% trans %}Shown in the server log when it started. With Docker:
+        <code>docker compose logs kidsplay-server</code>. It works once.{% endtrans %}</small>
+    </div>
+    <div class="field">
+      <label for="password">{% trans min=min_password_length %}Password (at least {{ min }} characters){% endtrans %}</label>
+      <input type="password" id="password" name="password" autocomplete="new-password"
+        minlength="{{ min_password_length }}" required>
+    </div>
+    <div class="field">
+      <label for="password_confirm">{{ _('Confirm password') }}</label>
+      <input type="password" id="password_confirm" name="password_confirm" autocomplete="new-password"
+        minlength="{{ min_password_length }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ _('Set password') }}</button>
+  </form>
+</div>
+{% endblock %}

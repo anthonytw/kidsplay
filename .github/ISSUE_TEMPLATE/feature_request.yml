@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose new behaviour or an improvement
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: One issue per module (see CLAUDE.md).
+      options:
+        - kidsplay-models
+        - kidsplay-server
+        - kidsplay-cli
+        - kidsplay-device
+        - Docs / tooling
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and why is it hard today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Reference files and functions by path. Link to docs/API.md for interface work.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Testable assertions.
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true

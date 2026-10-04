@@ -1,0 +1,1884 @@
+# Translations for kidsplay_server.
+# Copyright (C) KidsPlay contributors
+# This file is distributed under the same license as the KidsPlay project.
+msgid ""
+msgstr ""
+"Project-Id-Version: kidsplay_server 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/anthonytw/kidsplay/issues\n"
+"POT-Creation-Date: 2026-01-01 00:00+0000\n"
+"PO-Revision-Date: 2026-01-01 00:00+0000\n"
+"Last-Translator: KidsPlay contributors\n"
+"Language: es\n"
+"Language-Team: KidsPlay contributors\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: web/templates/_pairing.html
+#, python-format
+msgid "%(count)s device is waiting. Read its code off its screen and type it above."
+msgid_plural ""
+"%(count)s devices are waiting. Read the code off the screen of the one you are "
+"setting up and type it above."
+msgstr[0] ""
+"Hay %(count)s dispositivo esperando. Lee el código que muestra su pantalla y "
+"escríbelo arriba."
+msgstr[1] ""
+"Hay %(count)s dispositivos esperando. Lee el código que muestra la pantalla del que "
+"estás configurando y escríbelo arriba."
+
+#: web/templates/media.html
+#, python-format
+msgid "%(count)s item"
+msgid_plural "%(count)s items"
+msgstr[0] "%(count)s elemento"
+msgstr[1] "%(count)s elementos"
+
+#: web/templates/media_import.html
+#, python-format
+msgid "%(label)s URL (video or playlist)"
+msgstr "URL de %(label)s (video o lista de reproducción)"
+
+#: web/templates/media_import.html
+#, python-format
+msgid "%(label)s or image URL"
+msgstr "%(label)s o URL de una imagen"
+
+#: web/templates/profile_settings.html
+#, python-format
+msgid "%(name)s settings"
+msgstr "Ajustes de %(name)s"
+
+#: web/templates/profile_settings.html
+#, python-format
+msgid "%(name)s — settings"
+msgstr "%(name)s — ajustes"
+
+#: web/templates/media.html
+msgid "(Unknown)"
+msgstr "(Desconocido)"
+
+#: web/templates/media_import.html
+msgid "(empty)"
+msgstr "(vacío)"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "({count} failed)"
+msgstr "({count} con error)"
+
+#: web/templates/queue.html
+msgid "+ New Import"
+msgstr "+ Nueva importación"
+
+#: web/templates/media_import.html
+msgid "/mnt/source/music"
+msgstr "/mnt/source/music"
+
+#: web/templates/media_import.html
+msgid "1 track queued."
+msgstr "1 pista en cola."
+
+#: web/templates/_pairing.html
+msgid "A device is asking to pair:"
+msgstr "Un dispositivo solicita vincularse:"
+
+#: web/templates/_pairing.html
+msgid ""
+"A new handheld shows a code and a QR code. Scan the QR code, or type the code shown "
+"on the handheld's screen here, choose whose player it is and approve. Codes work for "
+"10 minutes."
+msgstr ""
+"Un dispositivo nuevo muestra un código y un código QR. Escanea el código QR o escribe"
+" aquí el código que aparece en la pantalla del dispositivo, elige de quién es el "
+"reproductor y aprueba. Los códigos funcionan durante 10 minutos."
+
+#: web/templates/base.html
+msgid "AGPL-3.0 or later"
+msgstr "AGPL-3.0 o posterior"
+
+#: web/templates/base.html web/templates/dashboard.html
+msgid "API Docs"
+msgstr "Documentación de la API"
+
+#: web/templates/base.html
+msgid "API Tokens"
+msgstr "Tokens de API"
+
+#: web/templates/devices.html
+msgid "API key"
+msgstr "Clave de API"
+
+#: web/templates/tokens.html
+msgid "API tokens"
+msgstr "Tokens de API"
+
+#: web/templates/media_import.html
+msgid "Absolute path accessible to the server. Directories are walked recursively."
+msgstr ""
+"Ruta absoluta accesible para el servidor. Los directorios se recorren de forma "
+"recursiva."
+
+#: web/templates/account.html web/templates/base.html
+msgid "Account"
+msgstr "Cuenta"
+
+#: web/templates/media.html
+msgid "Add"
+msgstr "Agregar"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Add failed: {detail}"
+msgstr "No se pudo agregar: {detail}"
+
+#: web/templates/media_import.html
+msgid "Add to queue"
+msgstr "Agregar a la cola"
+
+#: web/templates/tokens.html
+msgid "Admin API tokens"
+msgstr "Tokens de API de administración"
+
+#: web/templates/account.html
+msgid ""
+"Admin authentication is turned off (<code>KIDSPLAY_AUTH=disabled</code>), so there is"
+" no password to manage here."
+msgstr ""
+"La autenticación de administrador está desactivada "
+"(<code>KIDSPLAY_AUTH=disabled</code>), así que aquí no hay contraseña que "
+"administrar."
+
+#: web/templates/login.html
+msgid "Admin password"
+msgstr "Contraseña de administrador"
+
+#: web/routes.py
+msgid "Admin sign-in is turned off, so there is no password."
+msgstr "El inicio de sesión de administrador está desactivado, así que no hay contraseña."
+
+#: web/templates/queue.html
+msgid "All"
+msgstr "Todos"
+
+#: web/templates/media.html
+msgid "All profiles"
+msgstr "Todos los perfiles"
+
+#: web/templates/media_import.html
+msgid "All tracks failed to queue."
+msgstr "No se pudo poner ninguna pista en la cola."
+
+#: web/templates/media.html
+msgid "All types"
+msgstr "Todos los tipos"
+
+#: web/routes.py
+msgid "Allow pairing new devices"
+msgstr "Permitir vincular dispositivos nuevos"
+
+#: web/templates/account.html
+msgid "Also revoke all API tokens"
+msgstr "Revocar también todos los tokens de API"
+
+#: web/templates/profile_settings.html
+msgid ""
+"Applied on every device linked to this profile after its next sync, and kept on the "
+"device so they work offline."
+msgstr ""
+"Se aplican en todos los dispositivos vinculados a este perfil después de su próxima "
+"sincronización y se guardan en el dispositivo para que funcionen sin conexión."
+
+#: web/templates/media_import.html
+msgid "Apply to all"
+msgstr "Aplicar a todos"
+
+#: web/templates/_pairing.html
+msgid "Approve"
+msgstr "Aprobar"
+
+#: web/templates/media_import.html
+msgid "Archive Upload"
+msgstr "Subir archivo comprimido"
+
+#: web/templates/media_import.html
+msgid "Archive file"
+msgstr "Archivo comprimido"
+
+#: web/templates/media.html web/templates/media_import.html
+msgid "Artist"
+msgstr "Artista"
+
+#: web/templates/media.html
+msgid "Artist…"
+msgstr "Artista…"
+
+#: web/templates/media_import.html
+msgid "Assign to profiles"
+msgstr "Asignar a perfiles"
+
+#: web/templates/queue.html
+#, python-brace-format
+msgid "Attempt {attempt} of {max}"
+msgstr "Intento {attempt} de {max}"
+
+#: web/routes.py web/templates/media.html web/templates/media_import.html
+#: web/templates/queue.html
+msgid "Audiobook"
+msgstr "Audiolibro"
+
+#: web/templates/dashboard.html
+msgid "Audiobook chapters"
+msgstr "Capítulos de audiolibros"
+
+#: web/templates/media.html
+msgid "Audiobooks"
+msgstr "Audiolibros"
+
+#: web/routes.py
+msgid "Audiobooks only"
+msgstr "Solo audiolibros"
+
+#: web/templates/logs.html
+msgid "Auto-scroll"
+msgstr "Desplazamiento automático"
+
+#: web/templates/media_import.html
+msgid "Back to Library"
+msgstr "Volver a la biblioteca"
+
+#: web/templates/profile_settings.html
+msgid "Back to profiles"
+msgstr "Volver a los perfiles"
+
+#: web/templates/profile_settings.html
+msgid "Bedtime"
+msgstr "Hora de dormir"
+
+#: themes.py
+msgid "Blue"
+msgstr "Azul"
+
+#: web/templates/media.html
+msgid ""
+"Bring every song and audiobook to the loudness target. Items already at the target "
+"are skipped."
+msgstr ""
+"Lleva todas las canciones y audiolibros al nivel de sonoridad objetivo. Los elementos"
+" que ya están en el objetivo se omiten."
+
+#: web/templates/dashboard.html
+msgid "Browse Media"
+msgstr "Explorar medios"
+
+#: web/routes.py
+msgid "Built-in themes can't be changed or deleted."
+msgstr "Los temas integrados no se pueden modificar ni eliminar."
+
+#: web/templates/media_import.html
+msgid "Bulk Filesystem"
+msgstr "Sistema de archivos en lote"
+
+#: web/templates/profile_settings.html
+msgid "Button sounds"
+msgstr "Sonidos de botones"
+
+#: web/templates/media.html
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: web/templates/queue.html
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#: web/templates/account.html
+msgid "Change password"
+msgstr "Cambiar contraseña"
+
+#: web/templates/setup.html
+msgid ""
+"Choose an admin password. You will need it to manage media, profiles and devices from"
+" this web UI or the <code>kidsplay</code> CLI."
+msgstr ""
+"Elige una contraseña de administrador. La necesitarás para administrar los medios, "
+"los perfiles y los dispositivos desde esta interfaz web o desde la CLI "
+"<code>kidsplay</code>."
+
+#: web/templates/profile_settings.html
+msgid "Chosen on the device"
+msgstr "Se elige en el dispositivo"
+
+#: web/templates/logs.html web/templates/media.html
+msgid "Clear"
+msgstr "Limpiar"
+
+#: web/templates/media.html
+msgid "Close"
+msgstr "Cerrar"
+
+#: web/templates/_pairing.html
+msgid "Code shown on the handheld's screen"
+msgstr "Código que aparece en la pantalla del dispositivo"
+
+#: web/templates/profile_settings.html
+msgid ""
+"Colors, and any font, sounds and backgrounds of the theme. A theme chosen here "
+"replaces the one picked on the device, and reaches it at its next sync. Without one, "
+"the child can pick a color on the device (blue at first)."
+msgstr ""
+"Los colores y, si el tema los trae, la fuente, los sonidos y los fondos. Un tema "
+"elegido aquí reemplaza al que se eligió en el dispositivo y le llega en la próxima "
+"sincronización. Sin tema, el niño puede elegir un color en el dispositivo (azul al "
+"principio)."
+
+#: web/templates/media_import.html
+msgid "Command"
+msgstr "Comando"
+
+#: web/templates/queue.html
+msgid "Completed"
+msgstr "Completado"
+
+#: web/templates/queue.html
+#, python-brace-format
+msgid "Completed: {time}"
+msgstr "Completado: {time}"
+
+#: web/templates/account.html
+msgid "Confirm new password"
+msgstr "Confirmar la contraseña nueva"
+
+#: web/templates/setup.html
+msgid "Confirm password"
+msgstr "Confirmar contraseña"
+
+#: web/templates/media_import.html
+msgid "Copy"
+msgstr "Copiar"
+
+#: web/templates/tokens.html
+msgid "Copy this token now; it will not be shown again:"
+msgstr "Copia este token ahora; no se volverá a mostrar:"
+
+#: web/templates/tokens.html
+#, python-brace-format
+msgid "Could not create token (HTTP {status})."
+msgstr "No se pudo crear el token (HTTP {status})."
+
+#: web/templates/media_import.html
+msgid "Could not detect URL type. Try the other tabs manually."
+msgstr "No se pudo detectar el tipo de URL. Prueba las otras pestañas manualmente."
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Could not load image: {status}"
+msgstr "No se pudo cargar la imagen: {status}"
+
+#: web/templates/profiles.html web/templates/tokens.html
+msgid "Create"
+msgstr "Crear"
+
+#: web/templates/_pairing.html
+msgid "Create a profile first."
+msgstr "Primero crea un perfil."
+
+#: web/templates/tokens.html
+msgid "Create a token"
+msgstr "Crear un token"
+
+#: web/templates/tokens.html
+msgid "Created"
+msgstr "Creado"
+
+#: web/templates/queue.html
+#, python-brace-format
+msgid "Created: {time}"
+msgstr "Creado: {time}"
+
+#: web/templates/media_import.html
+msgid "Crop (4:3 — 640×480)"
+msgstr "Recortar (4:3 — 640×480)"
+
+#: web/templates/account.html
+msgid "Current password"
+msgstr "Contraseña actual"
+
+#: themes.py
+msgid "Cyan"
+msgstr "Cian"
+
+#: web/templates/base.html web/templates/dashboard.html
+msgid "Dashboard"
+msgstr "Panel"
+
+#: web/templates/profile_settings.html
+msgid "Day"
+msgstr "Día"
+
+#: web/templates/media_import.html
+msgid "Debug info"
+msgstr "Información de depuración"
+
+#: web/templates/_pairing.html
+msgid "Decline"
+msgstr "Rechazar"
+
+#: web/templates/devices.html web/templates/media.html web/templates/profiles.html
+#: web/templates/queue.html
+msgid "Delete"
+msgstr "Eliminar"
+
+#: web/templates/media.html
+#, python-format
+msgid "Delete '%(name)s'?"
+msgstr "¿Eliminar '%(name)s'?"
+
+#: web/templates/profiles.html
+#, python-format
+msgid "Delete profile '%(name)s'? This will fail if devices are linked."
+msgstr "¿Eliminar el perfil '%(name)s'? Fallará si hay dispositivos vinculados."
+
+#: web/templates/profiles.html
+#, python-brace-format
+msgid "Delete profile '{name}'?"
+msgstr "¿Eliminar el perfil '{name}'?"
+
+#: web/templates/queue.html
+msgid "Delete this queue item?"
+msgstr "¿Eliminar este elemento de la cola?"
+
+#: web/templates/profile_settings.html
+msgid "Device default"
+msgstr "Predeterminado del dispositivo"
+
+#: web/templates/_pairing.html web/templates/devices.html
+msgid "Device name"
+msgstr "Nombre del dispositivo"
+
+#: web/routes.py
+msgid "Device sync interval (seconds)"
+msgstr "Intervalo de sincronización del dispositivo (segundos)"
+
+#: web/templates/base.html web/templates/dashboard.html web/templates/devices.html
+msgid "Devices"
+msgstr "Dispositivos"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid ""
+"Done. Files found: {total}. Imported: {imported}, skipped: {skipped}, failed: "
+"{failed}."
+msgstr ""
+"Listo. Archivos encontrados: {total}. Importados: {imported}, omitidos: {skipped}, "
+"con error: {failed}."
+
+#: web/templates/media_import.html
+msgid ""
+"Drag to reposition, scroll or pinch to zoom. <strong>Fit</strong> shows the whole "
+"image (empty space on the sides); zoom in from there to crop. Only the overflowing "
+"side is constrained, so it can’t be pushed off-centre."
+msgstr ""
+"Arrastra para reposicionar; usa la rueda o pellizca para acercar o alejar. "
+"<strong>Ajustar</strong> muestra la imagen completa (con espacio vacío a los lados); "
+"acerca desde ahí para recortar. Solo se limita el lado que se desborda, por lo que la"
+" imagen no puede quedar descentrada."
+
+#: web/templates/media_import.html
+msgid "Duration"
+msgstr "Duración"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Duration: {duration}"
+msgstr "Duración: {duration}"
+
+#: web/templates/profile_settings.html
+msgid "During bedtime"
+msgstr "Durante la hora de dormir"
+
+#: web/templates/media.html
+msgid "Edit"
+msgstr "Editar"
+
+#: web/templates/media.html
+msgid "Edit Media"
+msgstr "Editar medios"
+
+#: web/templates/profile_settings.html
+msgid "Enabled"
+msgstr "Activado"
+
+#: web/templates/account.html
+msgid ""
+"Ends every browser session, including this one. Use it if you left yourself logged in"
+" on a shared computer. API tokens are not affected."
+msgstr ""
+"Cierra todas las sesiones del navegador, incluida esta. Úsalo si dejaste tu sesión "
+"abierta en una computadora compartida. Los tokens de API no se ven afectados."
+
+#: web/templates/devices.html
+msgid "Enter a device name."
+msgstr "Ingresa un nombre de dispositivo."
+
+#: web/templates/tokens.html
+msgid "Enter a name."
+msgstr "Ingresa un nombre."
+
+#: web/templates/profiles.html
+msgid "Enter a profile name."
+msgstr "Ingresa un nombre de perfil."
+
+#: web/templates/media_import.html
+msgid "Enter a server-side path."
+msgstr "Ingresa una ruta del lado del servidor."
+
+#: web/templates/_pairing.html
+msgid "Enter the code shown on the handheld's screen."
+msgstr "Ingresa el código que aparece en la pantalla del dispositivo."
+
+#: web/templates/queue.html
+msgid "Error:"
+msgstr "Error:"
+
+#: web/templates/_pairing.html web/templates/devices.html web/templates/media_import.html
+#: web/templates/profile_settings.html web/templates/profiles.html
+#: web/templates/settings.html
+#, python-brace-format
+msgid "Error: {detail}"
+msgstr "Error: {detail}"
+
+#: web/routes.py web/templates/queue.html
+msgid "Failed"
+msgstr "Con error"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Failed to queue: {detail}"
+msgstr "No se pudo poner en la cola: {detail}"
+
+#: web/templates/media_import.html
+msgid "Fallback playlist / group title"
+msgstr "Título de la lista de reproducción o grupo por defecto"
+
+#: web/templates/media_import.html
+msgid "Fetching metadata…"
+msgstr "Obteniendo metadatos…"
+
+#: web/templates/media_import.html
+msgid ""
+"Files inside subdirectories will use the <em>directory name</em> as the playlist "
+"title."
+msgstr ""
+"Los archivos dentro de subdirectorios usarán el <em>nombre del directorio</em> como "
+"título de la lista de reproducción."
+
+#: web/templates/media.html
+msgid "Filter"
+msgstr "Filtrar"
+
+#: web/templates/media_import.html
+msgid "Fit whole image"
+msgstr "Ajustar imagen completa"
+
+#: web/templates/profile_settings.html
+msgid ""
+"For hardware without a volume dial. \"Device default\" follows the device: on for a "
+"keyboard, off for the GPi Case 2. Never louder than the maximum above."
+msgstr ""
+"Para dispositivos sin perilla de volumen. «Predeterminado del dispositivo» depende "
+"del dispositivo: activado en uno con teclado, desactivado en la GPi Case 2. Nunca más"
+" alto que el máximo indicado arriba."
+
+#: web/routes.py
+msgid "Friday"
+msgstr "Viernes"
+
+#: web/templates/media_import.html
+msgid "From URL"
+msgstr "Desde URL"
+
+#: web/templates/media_import.html
+msgid "Go"
+msgstr "Ir"
+
+#: themes.py
+msgid "Green"
+msgstr "Verde"
+
+#: web/templates/media.html
+msgid "Group by"
+msgstr "Agrupar por"
+
+#: themes.py
+msgid "High contrast"
+msgstr "Alto contraste"
+
+#: web/templates/media.html
+msgid "Import"
+msgstr "Importar"
+
+#: web/templates/dashboard.html web/templates/media_import.html
+msgid "Import Media"
+msgstr "Importar medios"
+
+#: web/templates/queue.html
+msgid "Import Queue"
+msgstr "Cola de importación"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Import failed: {detail}"
+msgstr "Error al importar: {detail}"
+
+#: web/templates/queue.html
+msgid "Import media"
+msgstr "Importar medios"
+
+#: web/templates/media_import.html
+msgid "Import photo"
+msgstr "Importar foto"
+
+#: web/templates/media.html
+msgid "Import some"
+msgstr "Importa algunos"
+
+#: web/templates/media_import.html
+msgid "Importing…"
+msgstr "Importando…"
+
+#: web/templates/profile_settings.html
+msgid "In-app volume buttons"
+msgstr "Botones de volumen de la aplicación"
+
+#: web/auth_routes.py
+msgid "Incorrect password."
+msgstr "Contraseña incorrecta."
+
+#: web/auth_routes.py
+msgid ""
+"Incorrect setup code. Find it in the server log, for example with: docker compose "
+"logs kidsplay-server"
+msgstr ""
+"Código de configuración incorrecto. Búscalo en el registro del servidor, por ejemplo "
+"con: docker compose logs kidsplay-server"
+
+#: web/templates/media_import.html
+msgid "Invalid JSON response"
+msgstr "Respuesta JSON no válida"
+
+#: web/templates/base.html web/templates/profile_settings.html
+msgid "Language"
+msgstr "Idioma"
+
+#: web/templates/profile_settings.html
+msgid "Language on the device"
+msgstr "Idioma en el dispositivo"
+
+#: web/templates/devices.html
+msgid "Last sync"
+msgstr "Última sincronización"
+
+#: web/templates/tokens.html
+msgid "Last used"
+msgstr "Último uso"
+
+#: server_settings.py
+msgid "Let handhelds pair themselves with a code. Turn off once your devices are set up."
+msgstr ""
+"Permite que los dispositivos se vinculen solos con un código. Desactívalo cuando ya "
+"tengas todo configurado."
+
+#: web/templates/media_import.html
+msgid "Load"
+msgstr "Cargar"
+
+#: web/templates/media_import.html
+msgid "Load an image first."
+msgstr "Primero carga una imagen."
+
+#: web/templates/queue.html
+msgid "Loading…"
+msgstr "Cargando…"
+
+#: web/templates/login.html
+msgid "Log in"
+msgstr "Iniciar sesión"
+
+#: web/templates/base.html
+msgid "Log out"
+msgstr "Cerrar sesión"
+
+#: web/templates/account.html
+msgid "Log out all sessions"
+msgstr "Cerrar todas las sesiones"
+
+#: web/templates/account.html
+msgid "Log out every browser session, including this one?"
+msgstr "¿Cerrar todas las sesiones del navegador, incluida esta?"
+
+#: web/templates/account.html
+msgid "Log out everywhere"
+msgstr "Cerrar sesión en todas partes"
+
+#: web/templates/base.html web/templates/logs.html
+msgid "Logs"
+msgstr "Registros"
+
+#: web/templates/profile_settings.html
+msgid "Look of the device"
+msgstr "Aspecto del dispositivo"
+
+#: web/routes.py
+msgid "Loudness target (LUFS)"
+msgstr "Objetivo de sonoridad (LUFS)"
+
+#: web/routes.py
+msgid "Loudness target for audiobooks (LUFS)"
+msgstr "Objetivo de sonoridad para audiolibros (LUFS)"
+
+#: server_settings.py
+msgid ""
+"Loudness target for audiobooks, for example -14 for louder speech. Empty uses the "
+"overall target."
+msgstr ""
+"Objetivo de sonoridad para audiolibros, por ejemplo -14 para una voz más fuerte. "
+"Vacío usa el objetivo general."
+
+#: web/routes.py
+msgid "Loudness target for music (LUFS)"
+msgstr "Objetivo de sonoridad para música (LUFS)"
+
+#: server_settings.py
+msgid "Loudness target for music. Empty uses the overall target."
+msgstr "Objetivo de sonoridad para la música. Vacío usa el objetivo general."
+
+#: server_settings.py
+msgid ""
+"Loudness target in LUFS (-70 to -5) for music and audiobooks without their own. "
+"Applies to audio processed from now on; normalize the library again to bring existing"
+" items to it."
+msgstr ""
+"Objetivo de sonoridad en LUFS (de -70 a -5) para la música y los audiolibros que no "
+"tengan uno propio. Se aplica al audio que se procese desde ahora; normaliza de nuevo "
+"la biblioteca para llevar lo que ya está a este objetivo."
+
+#: web/routes.py
+msgid "Loudness: normalizing…"
+msgstr "Sonoridad: normalizando…"
+
+#: web/routes.py
+msgid "Loudness: not normalized"
+msgstr "Sonoridad: sin normalizar"
+
+#: web/routes.py
+msgid "Loudness: too quiet to measure, kept unchanged"
+msgstr "Sonoridad: demasiado bajo para medirlo, se dejó sin cambios"
+
+#: web/routes.py
+#, python-brace-format
+msgid ""
+"Loudness: {source:.1f} LUFS → {output:.1f} LUFS ({gain:+.1f} dB, kept below the "
+"{target:g} LUFS target to avoid limiting)"
+msgstr ""
+"Sonoridad: {source:.1f} LUFS → {output:.1f} LUFS ({gain:+.1f} dB, por debajo del "
+"objetivo de {target:g} LUFS para no limitar)"
+
+#: web/routes.py
+#, python-brace-format
+msgid "Loudness: {source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB)"
+msgstr "Sonoridad: {source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB)"
+
+#: web/routes.py
+#, python-brace-format
+msgid "Loudness: {source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB, loud peaks limited)"
+msgstr ""
+"Sonoridad: {source:.1f} LUFS → {target:g} LUFS ({gain:+.1f} dB, picos fuertes "
+"limitados)"
+
+#: web/templates/profile_settings.html
+msgid "Maximum volume:"
+msgstr "Volumen máximo:"
+
+#: web/templates/base.html web/templates/media.html
+msgid "Media"
+msgstr "Medios"
+
+#: web/templates/media.html
+msgid "Media Library"
+msgstr "Biblioteca de medios"
+
+#: web/templates/media_import.html
+msgid "Media type"
+msgstr "Tipo de medio"
+
+#: web/templates/base.html
+msgid "Menu"
+msgstr "Menú"
+
+#: web/routes.py
+msgid "Monday"
+msgstr "Lunes"
+
+#: web/routes.py web/templates/media.html web/templates/media_import.html
+#: web/templates/queue.html
+msgid "Music"
+msgstr "Música"
+
+#: web/templates/dashboard.html
+msgid "Music tracks"
+msgstr "Pistas de música"
+
+#: web/templates/devices.html web/templates/profiles.html web/templates/tokens.html
+msgid "Name"
+msgstr "Nombre"
+
+#: web/templates/media_import.html
+msgid "Network error"
+msgstr "Error de red"
+
+#: web/templates/media.html web/templates/media_import.html
+#, python-brace-format
+msgid "Network error: {error}"
+msgstr "Error de red: {error}"
+
+#: web/templates/devices.html
+msgid "Never"
+msgstr "Nunca"
+
+#: web/templates/account.html
+#, python-format
+msgid "New password (at least %(min)s characters)"
+msgstr "Contraseña nueva (al menos %(min)s caracteres)"
+
+#: web/templates/profiles.html
+msgid "New profile"
+msgstr "Nuevo perfil"
+
+#: themes.py
+msgid "Night"
+msgstr "Noche"
+
+#: web/routes.py
+msgid "No admin password is set yet. Finish setup first."
+msgstr "Todavía no hay una contraseña de administrador. Termina primero la configuración."
+
+#: web/templates/_pairing.html
+msgid ""
+"No device is waiting with that code. It may have expired; check the code on the "
+"handheld's screen."
+msgstr ""
+"Ningún dispositivo está esperando con ese código. Puede que haya caducado; revisa el "
+"código en la pantalla del dispositivo."
+
+#: web/templates/devices.html
+msgid "No devices registered."
+msgstr "No hay dispositivos registrados."
+
+#: web/templates/media_import.html
+msgid "No duplicates found."
+msgstr "No se encontraron duplicados."
+
+#: web/templates/media_import.html
+msgid "No image available to upload."
+msgstr "No hay ninguna imagen disponible para subir."
+
+#: web/routes.py
+msgid "No installed importer can handle that address."
+msgstr "Ningún importador instalado puede manejar esa dirección."
+
+#: web/routes.py
+msgid "No installed importer can preview that address."
+msgstr "Ningún importador instalado puede mostrar una vista previa de esa dirección."
+
+#: web/templates/queue.html
+msgid "No items in queue."
+msgstr "No hay elementos en la cola."
+
+#: web/templates/media.html
+msgid "No media found."
+msgstr "No se encontraron medios."
+
+#: web/templates/media.html
+msgid "No profiles defined"
+msgstr "No hay perfiles definidos"
+
+#: web/templates/profiles.html
+msgid "No profiles yet."
+msgstr "Aún no hay perfiles."
+
+#: web/templates/tokens.html
+msgid "No tokens yet."
+msgstr "Aún no hay tokens."
+
+#: web/templates/media_import.html
+msgid "No tracks selected."
+msgstr "No hay pistas seleccionadas."
+
+#: web/templates/media.html
+msgid "None"
+msgstr "Ninguno"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Normalize failed: {detail}"
+msgstr "Error al normalizar: {detail}"
+
+#: web/templates/settings.html
+msgid "Normalize library now"
+msgstr "Normalizar la biblioteca ahora"
+
+#: web/templates/media.html
+msgid "Normalize loudness"
+msgstr "Normalizar sonoridad"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Normalized {n}"
+msgstr "Normalizados {n}"
+
+#: web/templates/media.html
+msgid "Normalizing…"
+msgstr "Normalizando…"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Normalizing… {done}/{total}"
+msgstr "Normalizando… {done}/{total}"
+
+#: web/templates/settings.html
+msgid "Not now"
+msgstr "Ahora no"
+
+#: web/routes.py
+msgid "Not signed in, or the password was wrong. Sign in and try again."
+msgstr ""
+"No has iniciado sesión o la contraseña es incorrecta. Inicia sesión e inténtalo de "
+"nuevo."
+
+#: web/templates/profile_settings.html
+msgid "Off"
+msgstr "Desactivado"
+
+#: web/routes.py
+msgid "Off — no restrictions"
+msgstr "Desactivado — sin restricciones"
+
+#: web/templates/profile_settings.html
+msgid "On"
+msgstr "Activado"
+
+#: themes.py
+msgid "Orange"
+msgstr "Naranja"
+
+#: web/templates/account.html
+msgid ""
+"Other browsers are logged out. API tokens keep working unless you tick the box below;"
+" you can also revoke them on the API Tokens page."
+msgstr ""
+"Se cierra la sesión en los demás navegadores. Los tokens de API siguen funcionando "
+"salvo que marques la casilla de abajo; también puedes revocarlos en la página de "
+"tokens de API."
+
+#: web/templates/_pairing.html
+msgid "Pair a device"
+msgstr "Vincular un dispositivo"
+
+#: web/routes.py
+msgid "Pairing is turned off on this server."
+msgstr "La vinculación está desactivada en este servidor."
+
+#: web/templates/_pairing.html
+msgid ""
+"Pairing is turned off. Turn on \"Allow pairing new devices\" in <a "
+"href=\"/settings\">Settings</a> to set up a handheld with a code."
+msgstr ""
+"La vinculación está desactivada. Activa «Permitir vincular dispositivos nuevos» en <a"
+" href=\"/settings\">Ajustes</a> para configurar un dispositivo con un código."
+
+#: web/templates/setup.html
+#, python-format
+msgid "Password (at least %(min)s characters)"
+msgstr "Contraseña (al menos %(min)s caracteres)"
+
+#: web/templates/account.html
+msgid "Password changed. Other browsers were logged out."
+msgstr "Contraseña cambiada. Se cerró la sesión en los demás navegadores."
+
+#: web/auth_routes.py
+#, python-brace-format
+msgid "Password must be at least {min_length} characters."
+msgstr "La contraseña debe tener al menos {min_length} caracteres."
+
+#: web/auth_routes.py
+msgid "Passwords do not match."
+msgstr "Las contraseñas no coinciden."
+
+#: web/templates/media_import.html
+#, python-format
+msgid ""
+"Paste a <strong>%(label)s URL</strong> to import audio, or an <strong>image "
+"URL</strong> to import a photo."
+msgstr ""
+"Pega una <strong>URL de %(label)s</strong> para importar audio, o una <strong>URL de "
+"imagen</strong> para importar una foto."
+
+#: web/templates/media_import.html
+msgid "Paste an <strong>image URL</strong> to import a photo."
+msgstr "Pega una <strong>URL de imagen</strong> para importar una foto."
+
+#: web/routes.py web/templates/queue.html
+msgid "Pending"
+msgstr "Pendiente"
+
+#: web/routes.py web/templates/media.html web/templates/media_import.html
+#: web/templates/queue.html
+msgid "Photo"
+msgstr "Foto"
+
+#: web/templates/media_import.html
+msgid "Photo already in library (duplicate)."
+msgstr "La foto ya está en la biblioteca (duplicada)."
+
+#: web/templates/media_import.html
+msgid "Photo imported."
+msgstr "Foto importada."
+
+#: web/templates/media_import.html
+msgid "Photo title"
+msgstr "Título de la foto"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Photo {n} of {total}"
+msgstr "Foto {n} de {total}"
+
+#: web/templates/dashboard.html web/templates/media.html
+msgid "Photos"
+msgstr "Fotos"
+
+#: web/templates/media.html web/templates/media_import.html
+msgid "Playlist"
+msgstr "Lista de reproducción"
+
+#: web/templates/media.html
+msgid "Playlist / Group"
+msgstr "Lista de reproducción / grupo"
+
+#: web/templates/media.html
+msgid "Playlist / Group *"
+msgstr "Lista de reproducción / grupo *"
+
+#: web/templates/media_import.html
+msgid "Playlist / album title"
+msgstr "Título de la lista de reproducción / álbum"
+
+#: web/templates/media_import.html
+msgid "Playlist / book title"
+msgstr "Título de la lista de reproducción / libro"
+
+#: web/templates/media_import.html
+msgid "Playlist / group title"
+msgstr "Título de la lista de reproducción / grupo"
+
+#: web/templates/media.html
+msgid "Playlist name is required."
+msgstr "El nombre de la lista de reproducción es obligatorio."
+
+#: web/templates/media.html
+msgid "Playlist…"
+msgstr "Lista de reproducción…"
+
+#: web/templates/media_import.html
+msgid "Preview"
+msgstr "Vista previa"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Preview failed: {detail}"
+msgstr "Error en la vista previa: {detail}"
+
+#: web/routes.py
+msgid "Processing"
+msgstr "Procesando"
+
+#: web/templates/_pairing.html web/templates/devices.html web/templates/media.html
+msgid "Profile"
+msgstr "Perfil"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Profile assign failed: {detail}"
+msgstr "No se pudo asignar el perfil: {detail}"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Profile unassign failed: {detail}"
+msgstr "No se pudo desasignar el perfil: {detail}"
+
+#: web/templates/base.html web/templates/dashboard.html web/templates/media.html
+#: web/templates/profiles.html
+msgid "Profiles"
+msgstr "Perfiles"
+
+#: web/templates/media.html
+msgid "Profiles:"
+msgstr "Perfiles:"
+
+#: themes.py
+msgid "Purple"
+msgstr "Morado"
+
+#: web/templates/base.html
+msgid "Queue"
+msgstr "Cola"
+
+#: web/templates/media_import.html
+msgid "Queue selected tracks"
+msgstr "Poner en cola las pistas seleccionadas"
+
+#: web/templates/media_import.html
+msgid "Queued for import."
+msgstr "En cola para importar."
+
+#: web/templates/media_import.html
+msgid "Quick Import"
+msgstr "Importación rápida"
+
+#: web/templates/media_import.html
+#, python-format
+msgid ""
+"Radio/mix links (%(example)s) are trimmed to the single video automatically. For a "
+"real playlist, at most %(max_items)s are fetched for preview — raise this and press "
+"Preview again to see more."
+msgstr ""
+"Los enlaces de radio o mezcla (%(example)s) se recortan automáticamente al video "
+"individual. Para una lista de reproducción real, se obtienen como máximo "
+"%(max_items)s para la vista previa; aumenta este valor y presiona Vista previa de "
+"nuevo para ver más."
+
+#: web/routes.py
+msgid "Ready"
+msgstr "Listo"
+
+#: themes.py
+msgid "Red"
+msgstr "Rojo"
+
+#: web/templates/devices.html
+msgid "Register"
+msgstr "Registrar"
+
+#: web/templates/devices.html
+msgid "Register device"
+msgstr "Registrar dispositivo"
+
+#: web/templates/media.html
+msgid "Remove"
+msgstr "Quitar"
+
+#: web/templates/media_import.html
+msgid "Remove duplicates"
+msgstr "Quitar duplicados"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Remove failed: {detail}"
+msgstr "No se pudo quitar: {detail}"
+
+#: web/templates/media_import.html
+msgid "Removed 1 duplicate."
+msgstr "Se quitó 1 duplicado."
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Removed {count} duplicates."
+msgstr "Se quitaron {count} duplicados."
+
+#: web/templates/media_import.html
+msgid "Reset crop"
+msgstr "Restablecer recorte"
+
+#: web/templates/settings.html
+#, python-format
+msgid "Reset to default (%(default)s)"
+msgstr "Restablecer al valor por defecto (%(default)s)"
+
+#: web/templates/queue.html
+msgid "Retry"
+msgstr "Reintentar"
+
+#: web/templates/media_import.html
+msgid "Return code:"
+msgstr "Código de retorno:"
+
+#: web/templates/tokens.html
+msgid "Revoke"
+msgstr "Revocar"
+
+#: web/templates/tokens.html
+msgid "Revoke this token?"
+msgstr "¿Revocar este token?"
+
+#: web/templates/tokens.html
+#, python-format
+msgid "Revoke token '%(name)s'?"
+msgstr "¿Revocar el token '%(name)s'?"
+
+#: web/templates/media_import.html
+msgid "Root-level files use the fallback title below."
+msgstr "Los archivos del nivel raíz usan el título por defecto indicado abajo."
+
+#: web/templates/queue.html
+msgid "Running"
+msgstr "En ejecución"
+
+#: web/routes.py
+msgid "Saturday"
+msgstr "Sábado"
+
+#: web/templates/media.html web/templates/profile_settings.html web/templates/settings.html
+msgid "Save"
+msgstr "Guardar"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Save failed: {detail}"
+msgstr "No se pudo guardar: {detail}"
+
+#: web/templates/media.html
+msgid "Search"
+msgstr "Buscar"
+
+#: server_settings.py
+msgid ""
+"Seconds between device sync attempts (60 to 86400). Devices use their own setting "
+"until you save one here."
+msgstr ""
+"Segundos entre intentos de sincronización del dispositivo (de 60 a 86400). Los "
+"dispositivos usan su propio ajuste hasta que guardes uno aquí."
+
+#: web/templates/media.html
+msgid "Select"
+msgstr "Seleccionar"
+
+#: web/templates/media.html web/templates/media_import.html
+msgid "Select all"
+msgstr "Seleccionar todo"
+
+#: web/templates/media_import.html
+msgid "Select an archive file first."
+msgstr "Primero selecciona un archivo comprimido."
+
+#: web/templates/media.html
+msgid "Select group"
+msgstr "Seleccionar grupo"
+
+#: web/templates/logs.html
+msgid "Server Logs"
+msgstr "Registros del servidor"
+
+#: web/templates/settings.html
+msgid "Server settings"
+msgstr "Ajustes del servidor"
+
+#: web/templates/media_import.html
+msgid "Server-side path"
+msgstr "Ruta del lado del servidor"
+
+#: web/templates/media.html
+msgid "Set Artist"
+msgstr "Establecer artista"
+
+#: web/templates/media.html
+msgid "Set Playlist"
+msgstr "Establecer lista de reproducción"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Set artist failed: {detail}"
+msgstr "No se pudo establecer el artista: {detail}"
+
+#: web/templates/media_import.html
+msgid "Set artist for all tracks"
+msgstr "Establecer artista para todas las pistas"
+
+#: web/templates/setup.html
+msgid "Set password"
+msgstr "Establecer contraseña"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "Set playlist failed: {detail}"
+msgstr "No se pudo establecer la lista de reproducción: {detail}"
+
+#: web/templates/base.html web/templates/profiles.html web/templates/settings.html
+msgid "Settings"
+msgstr "Ajustes"
+
+#: web/templates/setup.html
+msgid "Setup"
+msgstr "Configuración inicial"
+
+#: web/templates/setup.html
+msgid "Setup code"
+msgstr "Código de configuración"
+
+#: web/templates/queue.html
+#, python-brace-format
+msgid "Show full log ({attempt}/{max} attempts)"
+msgstr "Mostrar registro completo ({attempt}/{max} intentos)"
+
+#: web/templates/devices.html
+msgid "Show key"
+msgstr "Mostrar clave"
+
+#: web/templates/logs.html
+msgid "Show:"
+msgstr "Mostrar:"
+
+#: web/templates/media.html
+#, python-format
+msgid "Showing %(count)s item."
+msgid_plural "Showing %(count)s items."
+msgstr[0] "Mostrando %(count)s elemento."
+msgstr[1] "Mostrando %(count)s elementos."
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Showing {shown} of {total} tracks."
+msgstr "Mostrando {shown} de {total} pistas."
+
+#: web/templates/setup.html
+msgid ""
+"Shown in the server log when it started. With Docker: <code>docker compose logs "
+"kidsplay-server</code>. It works once."
+msgstr ""
+"Aparece en el registro del servidor al iniciarse. Con Docker: <code>docker compose "
+"logs kidsplay-server</code>. Solo se puede usar una vez."
+
+#: web/routes.py
+msgid "Sleep screen — no playback"
+msgstr "Pantalla de hora de dormir — sin reproducción"
+
+#: web/templates/account.html
+#, python-brace-format
+msgid "Something went wrong (HTTP {status})."
+msgstr "Algo salió mal (HTTP {status})."
+
+#: web/templates/base.html
+msgid "Source code"
+msgstr "Código fuente"
+
+#: web/templates/media_import.html
+msgid "Start import"
+msgstr "Iniciar importación"
+
+#: web/templates/media.html
+msgid "Status"
+msgstr "Estado"
+
+#: web/templates/media_import.html
+msgid "Submitting…"
+msgstr "Enviando…"
+
+#: web/routes.py
+msgid "Sunday"
+msgstr "Domingo"
+
+#: web/routes.py
+msgid "That item can't be retried right now. Only failed or cancelled items can."
+msgstr ""
+"Este elemento no se puede reintentar ahora. Solo se pueden reintentar los que "
+"fallaron o se cancelaron."
+
+#: web/routes.py
+msgid "That item was not found. It may have been removed."
+msgstr "No se encontró ese elemento. Puede que se haya eliminado."
+
+#: web/routes.py
+msgid "That pairing code has expired."
+msgstr "Ese código de vinculación ha caducado."
+
+#: web/routes.py
+msgid "That pairing code is not valid."
+msgstr "Ese código de vinculación no es válido."
+
+#: web/routes.py
+msgid "That pairing code was already used."
+msgstr "Ese código de vinculación ya se usó."
+
+#: web/routes.py
+msgid "That pairing request was not found."
+msgstr "No se encontró esa solicitud de vinculación."
+
+#: web/routes.py
+msgid "That pairing was declined."
+msgstr "Se rechazó esa vinculación."
+
+#: web/routes.py web/templates/account.html
+msgid "The current password is incorrect."
+msgstr "La contraseña actual no es correcta."
+
+#: web/templates/profile_settings.html
+msgid ""
+"The language of this child's screens. It is the child's setting, not yours: the web "
+"UI and the CLI use your own language."
+msgstr ""
+"El idioma de las pantallas de este niño. Es un ajuste del niño, no tuyo: la interfaz "
+"web y la CLI usan tu propio idioma."
+
+#: web/templates/settings.html
+msgid ""
+"The loudness target changed. It applies to audio added from now on. Normalize the "
+"existing library to the new target now? Items already at it are skipped, and each one"
+" is re-processed from its kept original."
+msgstr ""
+"El objetivo de sonoridad cambió. Se aplica al audio que se agregue desde ahora. "
+"¿Normalizar ahora la biblioteca existente al nuevo objetivo? Lo que ya esté en él se "
+"omite y cada elemento se procesa de nuevo desde su original conservado."
+
+#: web/templates/_pairing.html
+msgid ""
+"The name is chosen by the device and is not proof of who it is. Check that the code "
+"below matches the one on your handheld's screen, then approve."
+msgstr ""
+"El nombre lo elige el propio dispositivo y no prueba de quién es. Comprueba que el "
+"código de abajo coincida con el de la pantalla de tu dispositivo y luego aprueba."
+
+#: web/templates/account.html
+msgid "The new password is too short."
+msgstr "La contraseña nueva es demasiado corta."
+
+#: web/templates/account.html
+msgid "The new passwords do not match."
+msgstr "Las contraseñas nuevas no coinciden."
+
+#: web/templates/profile_settings.html
+msgid ""
+"The player attenuates everything it plays, UI sounds included, to this level. The "
+"device's own volume dial and OS volume act on top of it, so they can only make it "
+"quieter."
+msgstr ""
+"El reproductor atenúa todo lo que reproduce, incluidos los sonidos de la interfaz, "
+"hasta este nivel. La perilla de volumen del propio dispositivo y el volumen del "
+"sistema operativo actúan sobre este límite, por lo que solo pueden bajarlo más."
+
+#: web/routes.py
+msgid "The request was refused. Reload the page and try again."
+msgstr "Se rechazó la solicitud. Recarga la página e inténtalo de nuevo."
+
+#: web/templates/profile_settings.html
+msgid ""
+"The short beep when a button is pressed. Off means silence, and the music no longer "
+"dips for it."
+msgstr ""
+"El pitido corto al pulsar un botón. Desactivado es silencio, y la música ya no baja "
+"de volumen por él."
+
+#: web/templates/profile_settings.html
+msgid "Theme"
+msgstr "Tema"
+
+#: web/templates/settings.html
+msgid ""
+"These take effect without a restart. A setting whose environment variable is set is "
+"locked: the environment always wins. Per-child settings (volume cap, bedtime, "
+"language) are on each <a href=\"/profiles\">profile</a>."
+msgstr ""
+"Estos ajustes surten efecto sin reiniciar. Un ajuste cuya variable de entorno está "
+"definida queda bloqueado: el entorno siempre tiene prioridad. Los ajustes de cada "
+"niño (límite de volumen, hora de dormir, idioma) están en cada <a "
+"href=\"/profiles\">perfil</a>."
+
+#: web/templates/_pairing.html
+#, python-format
+msgid ""
+"This server's ID is <strong>%(id)s</strong>. The handheld shows the same ID below its"
+" code; if they differ, it is talking to a different server, so don't approve."
+msgstr ""
+"El ID de este servidor es <strong>%(id)s</strong>. El dispositivo muestra el mismo ID"
+" debajo de su código; si son distintos, está hablando con otro servidor, así que no "
+"lo apruebes."
+
+#: web/routes.py
+msgid "This token is not allowed to do that."
+msgstr "Este token no tiene permiso para hacer eso."
+
+#: web/routes.py
+msgid "Thumbnail and photo quality (WebP, 1-100)"
+msgstr "Calidad de miniaturas y fotos (WebP, 1-100)"
+
+#: web/routes.py
+msgid "Thursday"
+msgstr "Jueves"
+
+#: web/templates/profile_settings.html
+msgid ""
+"Times are the device's local time. A day's bedtime runs until the next wake time, so "
+"a wake time earlier than bedtime means the next morning. When bedtime starts during "
+"playback the device fades the sound out over about 10 seconds. The device has no "
+"battery-backed clock: if it boots offline with a clock that is obviously wrong, "
+"bedtime is not enforced until it reaches the server."
+msgstr ""
+"Las horas corresponden a la hora local del dispositivo. La hora de dormir de un día "
+"dura hasta la siguiente hora de despertar, así que una hora de despertar anterior a "
+"la hora de dormir significa la mañana siguiente. Si la hora de dormir comienza "
+"durante la reproducción, el dispositivo baja el sonido gradualmente en unos 10 "
+"segundos. El dispositivo no tiene un reloj con batería: si arranca sin conexión y con"
+" un reloj claramente incorrecto, la hora de dormir no se aplica hasta que se conecte "
+"al servidor."
+
+#: web/templates/media.html web/templates/media_import.html
+msgid "Title"
+msgstr "Título"
+
+#: web/templates/media.html
+msgid "Title *"
+msgstr "Título *"
+
+#: web/templates/media.html
+msgid "Title and playlist are required."
+msgstr "El título y la lista de reproducción son obligatorios."
+
+#: web/templates/media_import.html
+msgid "To scroll the page, drag from the margins beside the photo."
+msgstr "Para desplazar la página, arrastra desde los márgenes junto a la foto."
+
+#: web/templates/tokens.html
+msgid ""
+"Tokens let the <code>kidsplay</code> CLI and scripts use the management API. Send one"
+" as <code>Authorization: Bearer &lt;token&gt;</code>, or run <code>kidsplay auth "
+"login</code> to create and store one automatically. Device sync keys are separate and"
+" managed on the Devices page."
+msgstr ""
+"Los tokens permiten que la CLI <code>kidsplay</code> y los scripts usen la API de "
+"administración. Envía uno como <code>Authorization: Bearer &lt;token&gt;</code>, o "
+"ejecuta <code>kidsplay auth login</code> para crear y guardar uno automáticamente. "
+"Las claves de sincronización de los dispositivos son independientes y se administran "
+"en la página Dispositivos."
+
+#: web/routes.py
+msgid "Too many attempts. Try again later."
+msgstr "Demasiados intentos. Inténtalo de nuevo más tarde."
+
+#: web/auth_routes.py web/templates/account.html
+msgid "Too many failed attempts. Try again later."
+msgstr "Demasiados intentos fallidos. Inténtalo de nuevo más tarde."
+
+#: web/routes.py
+msgid "Too many pairings are waiting. Try again later."
+msgstr "Hay demasiadas vinculaciones en espera. Inténtalo de nuevo más tarde."
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "Tracks in this list: {count}"
+msgstr "Pistas en esta lista: {count}"
+
+#: web/routes.py
+msgid "Tuesday"
+msgstr "Martes"
+
+#: web/templates/media.html
+msgid "Type"
+msgstr "Tipo"
+
+#: web/templates/media.html
+msgid "Type *"
+msgstr "Tipo *"
+
+#: web/templates/media_import.html
+msgid "Uncheck any tracks you do not want to import."
+msgstr "Desmarca las pistas que no quieras importar."
+
+#: web/templates/media_import.html
+msgid "Uncheck to import fewer, or raise the max above and Preview again to fetch more."
+msgstr ""
+"Desmarca para importar menos, o aumenta el máximo de arriba y vuelve a usar la vista "
+"previa para obtener más."
+
+#: web/templates/devices.html
+#, python-format
+msgid "Unregister device '%(name)s'?"
+msgstr "¿Anular el registro del dispositivo '%(name)s'?"
+
+#: web/templates/devices.html
+#, python-brace-format
+msgid "Unregister device '{name}'?"
+msgstr "¿Anular el registro del dispositivo '{name}'?"
+
+#: web/templates/settings.html
+#, python-format
+msgid "Unset %(var)s to edit here"
+msgstr "Quita %(var)s para editar aquí"
+
+#: web/routes.py
+msgid "Unsupported file type. Upload a .zip, .tar.gz, .tgz, .tar.bz2, .tar.xz or .tar file."
+msgstr ""
+"Tipo de archivo no admitido. Sube un archivo .zip, .tar.gz, .tgz, .tar.bz2, .tar.xz o"
+" .tar."
+
+#: web/templates/media_import.html
+msgid "Upload & Import"
+msgstr "Subir e importar"
+
+#: web/templates/media_import.html
+msgid ""
+"Upload a <strong>.zip</strong>, <strong>.tar.gz</strong>, <strong>.tgz</strong>, "
+"<strong>.tar.bz2</strong>, or <strong>.tar.xz</strong> archive."
+msgstr ""
+"Sube un archivo comprimido <strong>.zip</strong>, <strong>.tar.gz</strong>, "
+"<strong>.tgz</strong>, <strong>.tar.bz2</strong> o <strong>.tar.xz</strong>."
+
+#: web/templates/media_import.html
+msgid "Upload failed"
+msgstr "Error al subir"
+
+#: web/templates/media_import.html
+msgid "Upload file"
+msgstr "Subir archivo"
+
+#: web/templates/media_import.html
+msgid "Uploading…"
+msgstr "Subiendo…"
+
+#: web/templates/media_import.html
+msgid ""
+"Used for files at the archive root (no subdirectory). Defaults to the archive "
+"filename."
+msgstr ""
+"Se usa para los archivos en la raíz del archivo comprimido (sin subdirectorio). Por "
+"defecto es el nombre del archivo comprimido."
+
+#: web/templates/queue.html
+msgid "View in library"
+msgstr "Ver en la biblioteca"
+
+#: web/templates/media_import.html
+msgid "View queue"
+msgstr "Ver cola"
+
+#: web/templates/profile_settings.html
+msgid "Volume"
+msgstr "Volumen"
+
+#: web/templates/profile_settings.html
+msgid "Wake"
+msgstr "Despertar"
+
+#: server_settings.py
+msgid "WebP quality (1-100) for thumbnails and photos processed from now on."
+msgstr "Calidad WebP (1-100) para las miniaturas y fotos que se procesen a partir de ahora."
+
+#: web/routes.py
+msgid "Wednesday"
+msgstr "Miércoles"
+
+#: web/templates/setup.html
+msgid "Welcome to KidsPlay"
+msgstr "Te damos la bienvenida a KidsPlay"
+
+#: web/templates/queue.html
+#, python-brace-format
+msgid "Will retry (attempt {attempt} of {max})"
+msgstr "Se reintentará (intento {attempt} de {max})"
+
+#: web/templates/media_import.html
+msgid ""
+"You can also <strong>paste an image directly</strong> from your clipboard (Ctrl+V / "
+"Cmd+V)."
+msgstr ""
+"También puedes <strong>pegar una imagen directamente</strong> desde el portapapeles "
+"(Ctrl+V / Cmd+V)."
+
+#: web/templates/logs.html
+msgid "connecting…"
+msgstr "conectando…"
+
+#: web/templates/settings.html
+#, python-format
+msgid "default · env %(var)s"
+msgstr "valor por defecto · env %(var)s"
+
+#: web/templates/logs.html
+msgid "disconnected — retrying…"
+msgstr "desconectado — reintentando…"
+
+#: web/templates/media_import.html
+msgid "done"
+msgstr "listo"
+
+#: web/templates/_pairing.html
+msgid "e.g. ABCD-2345"
+msgstr "p. ej., ABCD-2345"
+
+#: web/templates/media_import.html
+msgid "e.g. Beach Day"
+msgstr "p. ej., Día de playa"
+
+#: web/templates/media_import.html
+msgid "e.g. Favourite Songs"
+msgstr "p. ej., Canciones favoritas"
+
+#: web/templates/profiles.html
+msgid "e.g. Leo"
+msgstr "p. ej., Leo"
+
+#: web/templates/_pairing.html web/templates/devices.html
+msgid "e.g. Leo's Player"
+msgstr "p. ej., Reproductor de Leo"
+
+#: web/templates/media_import.html
+msgid "e.g. Michael Jackson"
+msgstr "p. ej., Michael Jackson"
+
+#: web/templates/media_import.html
+msgid "e.g. My Music Collection"
+msgstr "p. ej., Mi colección de música"
+
+#: web/templates/media_import.html
+msgid "e.g. Summer 2024"
+msgstr "p. ej., Verano 2024"
+
+#: web/templates/tokens.html
+msgid "e.g. laptop CLI"
+msgstr "p. ej., CLI de la laptop"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "failed {n}"
+msgstr "con error {n}"
+
+#: web/templates/media_import.html
+msgid "https://example.com/image.jpg"
+msgstr "https://example.com/image.jpg"
+
+#: web/templates/media_import.html
+msgid "https://example.com/photo.jpg"
+msgstr "https://example.com/photo.jpg"
+
+#: web/templates/logs.html
+msgid "live"
+msgstr "en vivo"
+
+#: web/templates/media_import.html
+msgid "many"
+msgstr "muchas"
+
+#: web/templates/tokens.html
+msgid "never"
+msgstr "nunca"
+
+#: web/templates/settings.html
+msgid "off"
+msgstr "desactivado"
+
+#: web/templates/settings.html
+msgid "on"
+msgstr "activado"
+
+#: web/templates/media.html
+msgid "optional"
+msgstr "opcional"
+
+#: web/templates/media_import.html
+msgid "photo"
+msgstr "foto"
+
+#: web/templates/settings.html
+msgid "same as overall"
+msgstr "igual al general"
+
+#: web/templates/settings.html
+#, python-format
+msgid "set by %(var)s"
+msgstr "definido por %(var)s"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "skipped {n}"
+msgstr "omitidos {n}"
+
+#: web/templates/media_import.html
+msgid "stderr"
+msgstr "stderr"
+
+#: web/templates/media.html
+msgid "title, artist, playlist…"
+msgstr "título, artista, lista de reproducción…"
+
+#: web/templates/media_import.html
+msgid "tracks"
+msgstr "pistas"
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "unchanged {n}"
+msgstr "sin cambios {n}"
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "{count} failed to queue."
+msgstr "{count} no se pudieron poner en la cola."
+
+#: web/templates/media_import.html
+#, python-brace-format
+msgid "{count} tracks queued."
+msgstr "{count} pistas en cola."
+
+#: web/templates/media.html
+#, python-brace-format
+msgid "{n} selected"
+msgstr "{n} seleccionados"
+
+#: web/templates/devices.html
+msgid "— None —"
+msgstr "— Ninguno —"
+
+#: web/templates/_pairing.html
+#, python-brace-format
+msgid "✓ Device paired: {name}. It will finish setting up by itself."
+msgstr "✓ Dispositivo vinculado: {name}. Terminará de configurarse solo."
+
+#: web/templates/devices.html
+#, python-brace-format
+msgid "✓ Device registered. API key: {key}"
+msgstr "✓ Dispositivo registrado. Clave de API: {key}"
+
+#: web/templates/profiles.html
+msgid "✓ Profile created."
+msgstr "✓ Perfil creado."
+
+#: web/templates/profile_settings.html
+msgid "✓ Saved. Devices pick this up at their next sync."
+msgstr "✓ Guardado. Los dispositivos lo recibirán en su próxima sincronización."
+
+#~ msgid "%(label)s URL or https://example.com/photo.jpg"
+#~ msgstr "URL de %(label)s o https://example.com/photo.jpg"
+
+#~ msgid ") are trimmed to the single video automatically. For a real playlist, at most"
+#~ msgstr ""
+#~ ") se recortan automáticamente al video "
+#~ "individual. Para una lista de reproducción "
+#~ "real, como máximo"
+
+#~ msgid "Choose"
+#~ msgstr "Elegir"
+
+#~ msgid "Code"
+#~ msgstr "Código"
+
+#~ msgid "Radio/mix links ("
+#~ msgstr "Los enlaces de radio o mezcla ("
+
+#~ msgid "Waiting for approval"
+#~ msgstr "Esperando aprobación"
+
+#~ msgid "are fetched for preview — raise this and press Preview again to see more."
+#~ msgstr ""
+#~ "se obtienen para la vista previa; aumenta "
+#~ "este valor y presiona Vista previa de "
+#~ "nuevo para ver más."
+

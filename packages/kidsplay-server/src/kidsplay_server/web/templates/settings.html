@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %} — {{ _('Settings') }}{% endblock %}
+
+{% block content %}
+<h1>{{ _('Server settings') }}</h1>
+<p style="color:#666; font-size:0.88rem;">
+  {% trans %}These take effect without a restart. A setting whose environment variable is
+  set is locked: the environment always wins. Per-child settings (volume cap,
+  bedtime, language) are on each <a href="/profiles">profile</a>.{% endtrans %}
+</p>
+
+<div id="settings-result" class="hidden"></div>
+
+<div id="normalize-offer" class="alert hidden" style="max-width:640px;">
+  <p id="normalize-offer-text">{{ _('The loudness target changed. It applies to audio added from now on. Normalize the existing library to the new target now? Items already at it are skipped, and each one is re-processed from its kept original.') }}</p>
+  <button class="btn btn-primary" id="normalize-offer-yes" onclick="offerNormalize(true)">{{ _('Normalize library now') }}</button>
+  <button class="btn btn-secondary" id="normalize-offer-no" onclick="offerNormalize(false)">{{ _('Not now') }}</button>
+</div>
+
+<div class="card" style="max-width:640px;">
+  {% for f in fields %}
+  <div class="field">
+    <label for="setting-{{ f.key }}">{{ f.label }}</label>
+    <div class="field-inline">
+      {% if f.kind == 'bool' %}
+      <input type="checkbox" id="setting-{{ f.key }}" {% if f.value %}checked{% endif %}
+             data-key="{{ f.key }}" data-kind="bool"
+             data-initial="{{ 'true' if f.value else 'false' }}" class="server-setting"
+             {% if f.locked %}disabled{% endif %}>
+      {% else %}
+      <input type="number" inputmode="{{ 'decimal' if f.kind == 'float' else 'numeric' }}"
+             id="setting-{{ f.key }}" data-key="{{ f.key }}" data-kind="{{ f.kind }}"
+             data-initial="{{ f.shown }}"
+             class="server-setting" value="{{ f.shown }}"
+             {% if f.default is none %}placeholder="{{ _('same as overall') }}"{% endif %}
+             min="{{ '%g'|format(f.min) }}" max="{{ '%g'|format(f.max) }}"
+             step="{{ 'any' if f.kind == 'float' else '1' }}"
+             {% if f.locked %}disabled{% endif %}>
+      {% endif %}
+      {% if f.locked %}
+        <span style="font-size:0.8rem; color:#8a6d3b; background:#fcf8e3; padding:0.15rem 0.45rem; border-radius:3px;" title="{{ _('Unset %(var)s to edit here', var=f.env_var) }}">🔒 {{ _('set by %(var)s', var=f.env_var) }}</span>
+      {% elif f.saved %}
+        <button class="btn btn-secondary btn-sm" onclick="resetSetting('{{ f.key }}')">{{ _('Reset to default (%(default)s)', default=(_('on') if f.default else _('off')) if f.kind == 'bool' else (f.default_shown or _('same as overall'))) }}</button>
+      {% else %}
+        <span style="color:#888; font-size:0.8rem;">{{ _('default · env %(var)s', var=f.env_var) }}</span>
+      {% endif %}
+    </div>
+    <p style="color:#666; font-size:0.8rem;">{{ f.help }}</p>
+  </div>
+  {% endfor %}
+  <button class="btn btn-primary" id="save-settings" onclick="saveServerSettings()">{{ _('Save') }}</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const LOUDNESS_KEYS = {{ loudness_keys|tojson }};
+
+async function putSettings(body) {
+  const result = document.getElementById('settings-result');
+  const resp = await fetch('/api/v1/server-settings', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  if (resp.ok) {
+    const touched = Object.keys(body).concat(body.reset || []);
+    if (touched.some(k => LOUDNESS_KEYS.includes(k))) {
+      // A new target: offer to bring the existing library to it. What is
+      // saved is now the baseline, so saving the same values again is a no-op.
+      document.querySelectorAll('.server-setting').forEach(function (input) {
+        input.dataset.initial = input.dataset.kind === 'bool'
+          ? String(input.checked) : input.value;
+      });
+      result.className = 'hidden';
+      document.getElementById('normalize-offer').className = 'alert alert-info';
+      document.getElementById('normalize-offer').scrollIntoView();
+      return;
+    }
+    window.location.reload();
+    return;
+  }
+  const data = await resp.json().catch(() => ({}));
+  const detail = apiDetail(data, resp.statusText);
+  result.className = 'alert alert-error';
+  result.textContent = {{ _('Error: {detail}')|tojson }}.replace('{detail}', detail);
+}
+
+async function offerNormalize(yes) {
+  if (yes) {
+    const r = await fetch('/api/v1/media/normalize', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({all: true}),
+    });
+    if (!r.ok) {
+      const result = document.getElementById('settings-result');
+      result.className = 'alert alert-error';
+      result.textContent = {{ _('Error: {detail}')|tojson }}.replace('{detail}', r.statusText);
+      return;
+    }
+    window.location.href = '/media';
+    return;
+  }
+  window.location.reload();
+}
+
+function saveServerSettings() {
+  const body = {};
+  const reset = [];
+  document.querySelectorAll('.server-setting').forEach(function (input) {
+    if (input.disabled) return;
+    const key = input.dataset.key;
+    if (input.dataset.kind === 'bool') {
+      if (String(input.checked) !== input.dataset.initial) body[key] = input.checked;
+      return;
+    }
+    // Only what the person changed is saved, so untouched settings stay on
+    // their defaults (and keep following them).
+    if (input.value === input.dataset.initial) return;
+    if (input.value === '') {
+      reset.push(key);   // an emptied optional setting goes back to "same as overall"
+      return;
+    }
+    body[key] = input.dataset.kind === 'float'
+      ? parseFloat(input.value) : parseInt(input.value, 10);
+  });
+  if (reset.length) body.reset = reset;
+  if (!Object.keys(body).length) return;
+  putSettings(body);
+}
+
+function resetSetting(key) {
+  putSettings({reset: [key]});
+}
+</script>
+{% endblock %}

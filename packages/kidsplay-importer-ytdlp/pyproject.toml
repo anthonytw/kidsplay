@@ -1,0 +1,34 @@
+[project]
+name = "kidsplay-importer-ytdlp"
+version = "0.1.0"
+description = "KidsPlay importer plugin: YouTube audio via yt-dlp"
+requires-python = ">=3.12"
+license = {text = "AGPL-3.0-or-later"}
+dependencies = [
+    "kidsplay-server",
+    # Pinned to a yt-dlp NIGHTLY, deliberately — not a loose floor and not stable.
+    # 2026-08-19: YouTube began requiring a GVS PO Token on the `android_vr`
+    # client, which yt-dlp had been using precisely because it needed no token.
+    # Every DASH audio URL it hands out now 403s at download time (extraction
+    # still succeeds, so the failure looks like a network problem — it is not).
+    # yt-dlp works around it with a new `visionos` client, first shipped in the
+    # 2026.07.23 nightly. The newest STABLE release (2026.07.04) predates that
+    # fix, so tracking stable leaves downloads broken. See yt-dlp issue #17348.
+    # To move: bump to a newer nightly, or back to stable once one ships >= the
+    # 2026.07.23 fix — then `uv lock` and rebuild the image.
+    "yt-dlp==2026.8.18.122307.dev0",
+    "deno",
+]
+
+[project.entry-points."kidsplay.importers"]
+ytdlp = "kidsplay_importer_ytdlp.importer:YtDlpImporter"
+
+[tool.uv.sources]
+kidsplay-server = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kidsplay_importer_ytdlp"]

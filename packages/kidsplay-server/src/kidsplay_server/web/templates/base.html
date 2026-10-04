@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>KidsPlay{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/cropper.min.css">
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/cropper.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f0f0f5; color: #222; font-size: 14px; }
+
+    nav { background: #1a1a2e; color: #fff; padding: 0.6rem 1.5rem; display: flex; gap: 1.5rem; align-items: center; }
+    /* Wrap rather than overflow: how wide the full row is depends on the
+       language and the installed fonts, so no fixed breakpoint is safe. */
+    nav .nav-links { flex: 1; display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; align-items: center; min-width: 0; }
+    nav .nav-toggle { display: none; }
+    nav .nav-docs { font-size: 0.78rem; color: #666; }
+    nav .brand { font-weight: 700; font-size: 1rem; color: #fff; text-decoration: none; margin-right: 0.5rem; }
+    nav a { color: #aaa; text-decoration: none; font-size: 0.88rem; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
+    nav a:hover { color: #fff; }
+    nav a.active { color: #fff; border-bottom-color: #7c82f5; }
+    nav .spacer { flex: 1; }
+    nav .lang-picker { display: inline-flex; gap: 0.6rem; }
+    nav .lang-picker a { font-size: 0.78rem; }
+    nav form { display: inline; }
+    nav button.link { background: none; border: none; color: #aaa; cursor: pointer; font: inherit; font-size: 0.78rem; padding: 0; }
+    nav button.link:hover { color: #fff; }
+
+    main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+    .site-footer { max-width: 1100px; margin: 2rem auto 1rem; padding: 0 1rem; font-size: 0.8rem; color: #888; }
+    .site-footer a { color: inherit; }
+
+    h1 { font-size: 1.35rem; font-weight: 600; margin-bottom: 1.25rem; }
+    h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.75rem; }
+
+    .card { background: #fff; border-radius: 6px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 1rem; }
+
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    th { background: #f7f7fa; font-size: 0.76rem; text-transform: uppercase; letter-spacing: .05em; color: #666; padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid #e5e5ec; }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #f0f0f5; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafe; }
+
+    .btn { display: inline-block; padding: 0.38rem 0.85rem; border-radius: 4px; border: none; cursor: pointer; font-size: 0.83rem; font-family: inherit; line-height: 1.4; text-decoration: none; }
+    .btn-primary { background: #1a1a2e; color: #fff; }
+    .btn-primary:hover { background: #2a2a4e; }
+    .btn-secondary { background: #e8e8f0; color: #333; }
+    .btn-secondary:hover { background: #d8d8e8; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-danger:hover { background: #c82333; }
+    .btn-sm { padding: 0.22rem 0.55rem; font-size: 0.78rem; }
+
+    input[type=text], input[type=url], input[type=password], input[type=number], input[type=time], select, textarea {
+      padding: 0.38rem 0.6rem; border: 1px solid #ccc; border-radius: 4px;
+      font-size: 0.88rem; font-family: inherit;
+    }
+    input[type=text], input[type=url], input[type=password], select, textarea { width: 100%; }
+    input[type=text]:focus, input[type=url]:focus, input[type=password]:focus, input[type=number]:focus, input[type=time]:focus, select:focus, textarea:focus {
+      outline: 2px solid #7c82f5; outline-offset: 1px; border-color: #7c82f5;
+    }
+    label { font-size: 0.83rem; color: #444; display: block; margin-bottom: 0.25rem; }
+    .field { margin-bottom: 0.85rem; }
+    .field-inline { display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap; }
+
+    .tag { display: inline-block; padding: 0.12rem 0.45rem; background: #e8e8f0; border-radius: 3px; font-size: 0.76rem; margin: 0.05rem; }
+    .tag-ready { background: #d4edda; color: #155724; }
+    .tag-failed { background: #f8d7da; color: #721c24; }
+    .tag-processing { background: #fff3cd; color: #856404; }
+
+    .thumb { width: 38px; height: 38px; object-fit: cover; border-radius: 3px; display: block; }
+    .thumb-placeholder { width: 38px; height: 38px; background: #e8e8f0; border-radius: 3px; display: inline-block; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: #fff; border-radius: 6px; padding: 1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.1); text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #1a1a2e; line-height: 1; }
+    .stat-label { font-size: 0.76rem; color: #888; margin-top: 0.35rem; }
+
+    .tabs { display: flex; border-bottom: 2px solid #e5e5ec; margin-bottom: 1.25rem; }
+    .tab-btn { padding: 0.5rem 1.1rem; border: none; background: none; cursor: pointer; font-size: 0.88rem; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: inherit; }
+    .tab-btn:hover { color: #1a1a2e; }
+    .tab-btn.active { color: #1a1a2e; border-bottom-color: #7c82f5; font-weight: 600; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .htmx-indicator { opacity: 0; transition: opacity 100ms; }
+    .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }
+
+    .reveal-key { font-family: monospace; font-size: 0.78rem; letter-spacing: .04em; }
+    .hidden { display: none !important; }
+
+    #cropper-wrap { max-width: 580px; margin-bottom: 1rem; }
+    #crop-image { display: block; max-width: 100%; }
+
+    .checklist { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .checklist li label { display: flex; align-items: center; gap: 0.35rem; cursor: pointer;
+      background: #f0f0f8; border-radius: 4px; padding: 0.3rem 0.6rem; font-size: 0.83rem; }
+    .checklist li input[type=checkbox] { margin: 0; }
+
+    .track-list { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .track-list th, .track-list td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #f0f0f5; font-size: 0.83rem; }
+    .track-list th { background: #f7f7fa; font-size: 0.75rem; }
+    .track-list input[type=text] { padding: 0.2rem 0.4rem; font-size: 0.83rem; }
+
+    .progress-bar-wrap { background: #e8e8f0; border-radius: 4px; height: 10px; overflow: hidden; margin: 0.5rem 0; }
+    .progress-bar { background: #7c82f5; height: 100%; transition: width 200ms; }
+
+    .alert { padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.88rem; }
+    .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .page-header h1 { margin-bottom: 0; }
+
+    /* Two-column page layout: a list beside a form; stacks when narrow. */
+    .split { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; }
+    .split-main { flex: 3; min-width: 340px; overflow-x: auto; }
+    .split-main-narrow { flex: 2; min-width: 280px; }
+    .split-side { flex: 1; min-width: 220px; }
+
+    /* A checkbox wrapped in a label: the label is the tap target. */
+    .check-hit { display: inline-flex; align-items: center; justify-content: center; margin: 0; }
+    .check-hit-text { display: none; }
+
+    /* ---- Narrow screens: below 1101px, the nav collapses into a menu button.
+       (The full link row needs about 1060px in Spanish.) ----------------- */
+    @media (max-width: 1100px) {
+      /* Collapsible nav: brand + menu button, links drop down as a list. */
+      nav { flex-wrap: wrap; padding: 0.25rem 0.75rem; gap: 0; justify-content: space-between; }
+      nav .brand { display: flex; align-items: center; min-height: 44px; margin: 0; }
+      nav .nav-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; background: none; border: 1px solid #3a3f60; border-radius: 4px; color: #fff; font-size: 1.3rem; cursor: pointer; }
+      nav .nav-links { display: none; flex-basis: 100%; flex-direction: column; align-items: stretch; gap: 0; padding-bottom: 0.5rem; }
+      nav.open .nav-links, nav .nav-links.always { display: flex; }
+      nav .nav-links > a, nav button.link { display: flex; align-items: center; min-height: 44px; padding: 0 0.25rem; font-size: 0.95rem; border-bottom: 1px solid #262640; text-align: left; }
+      nav a.active { border-bottom-color: #262640; box-shadow: inset 3px 0 0 #7c82f5; padding-left: 0.6rem; }
+      nav .nav-links .nav-docs { font-size: 0.95rem; color: #aaa; }
+      nav .spacer { display: none; }
+      nav form { display: block; }
+      nav .lang-picker { display: flex; gap: 0; }
+      nav .lang-picker a { flex: 1; justify-content: center; min-height: 44px; font-size: 0.9rem; border-bottom: none; }
+      nav .lang-picker a.active { box-shadow: inset 0 -3px 0 #7c82f5; padding-left: 0.25rem; }
+    }
+
+    /* ---- Phones: below 600px ------------------------------------------- */
+    @media (max-width: 600px) {
+      body { font-size: 15px; }
+      main { margin: 1rem auto; padding: 0 0.75rem; }
+      h1 { font-size: 1.2rem; margin-bottom: 1rem; }
+      .card { padding: 1rem; }
+
+      /* Bigger tap targets and 16px fields (iOS zooms in on smaller ones). */
+      .btn { min-height: 44px; padding: 0.55rem 1rem; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center; }
+      .btn-sm { min-height: 44px; padding: 0.5rem 0.9rem; font-size: 0.9rem; }
+      input[type=text], input[type=url], input[type=password], input[type=number], input[type=time], select, textarea { min-height: 44px; font-size: 16px; padding: 0.5rem 0.7rem; }
+      input[type=file] { width: 100%; min-height: 44px; font-size: 16px; padding: 0.55rem 0; }
+      input[type=file]::file-selector-button { min-height: 44px; padding: 0 1rem; margin-right: 0.75rem; font: inherit; border: none; border-radius: 4px; background: #e8e8f0; color: #333; }
+      input[type=range] { width: 100%; min-height: 44px; }
+      input[type=checkbox] { width: 22px; height: 22px; flex-shrink: 0; }
+      label:has(> input[type=checkbox]) { display: flex; align-items: center; gap: 0.5rem; min-height: 44px; }
+      .check-hit { min-width: 44px; min-height: 44px; }
+      .field-inline > * { flex: 1 1 100%; min-width: 0; }
+      .field-inline .btn { flex: 1 1 auto; }
+      .field-inline > div[style] { flex: 1 1 100% !important; min-width: 0 !important; }
+      .field-inline select, .field-inline input { width: 100% !important; }
+      .checklist { flex-direction: column; }
+      .checklist li label { min-height: 44px; padding: 0.3rem 0.75rem; }
+      .checklist li { width: 100%; }
+
+      .tabs { flex-wrap: wrap; border-bottom: none; gap: 0.25rem; }
+      .tab-btn { flex: 1 1 auto; min-height: 44px; padding: 0.5rem 0.8rem; margin-bottom: 0; background: #e8e8f0; border-radius: 4px; border-bottom: none; }
+      .tab-btn.active { background: #1a1a2e; color: #fff; }
+
+      .page-header { flex-wrap: wrap; gap: 0.75rem; }
+      .page-header > * { max-width: 100%; }
+      .split { gap: 1rem; }
+      .split-main, .split-main-narrow, .split-side { flex: 1 1 100%; min-width: 0; }
+
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+      .stat-value { font-size: 1.6rem; }
+      #cropper-wrap { max-width: calc(100% - 3rem); margin-left: auto; margin-right: auto; }
+      pre, code { overflow-wrap: anywhere; }
+      p { overflow-wrap: anywhere; }
+    }
+    /* ---- Below 900px: table rows become stacked cards (the wide tables
+       no longer fit beside their padding, and would scroll sideways). ----- */
+    @media (max-width: 900px) {
+      /* Table rows become stacked cards; the column heading becomes the label
+         in front of each value (filled in from the <th> text by base.html). */
+      table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+      table.stack { background: none; box-shadow: none; border-radius: 0; overflow: visible; }
+      table.stack thead { display: block; }
+      table.stack thead tr { display: block; padding: 0; background: none; }
+      table.stack thead th { display: none; }
+      table.stack thead th.col-select { display: flex; align-items: center; gap: 0.25rem; width: auto; padding: 0; background: none; border: none; text-transform: none; letter-spacing: 0; font-size: 0.9rem; color: #444; }
+      table.stack thead .check-hit-text { display: inline; }
+      table.stack tbody tr { background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 0.6rem; padding: 0.35rem 0.75rem; }
+      table.stack tbody tr:hover td { background: none; }
+      table.stack td { display: flex; align-items: center; flex-wrap: wrap; gap: 0.25rem 0.75rem; padding: 0.35rem 0; border-bottom: 1px solid #f0f0f5; min-height: 40px; overflow-wrap: anywhere; text-align: left !important; }
+      table.stack td:last-child { border-bottom: none; }
+      table.stack td[data-label]::before { content: attr(data-label); flex: 0 0 7.5rem; overflow-wrap: normal; word-break: normal; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em; color: #666; }
+      table.stack td[colspan] { display: block; text-align: center !important; padding: 1.25rem 0 !important; }
+      table.stack td > form, table.stack td .btn { margin: 0; }
+      table.stack td.actions { justify-content: flex-end; gap: 0.5rem; padding-top: 0.5rem; }
+      table.stack td.actions .btn { flex: 1 1 auto; }
+      table.stack .tag { font-size: 0.8rem; padding: 0.2rem 0.5rem; }
+      table.stack.track-list td { padding: 0.35rem 0; }
+      table.stack.track-list input[type=text] { font-size: 16px; padding: 0.5rem 0.7rem; }
+      table.stack input[type=time] { flex: 1 1 8rem; width: auto; }
+    }
+
+    /* Touch screens of any size still get finger-sized targets. */
+    @media (pointer: coarse) {
+      .btn, .btn-sm { min-height: 44px; }
+    }
+  </style>
+</head>
+<body hx-headers='{"X-CSRF-Token": "{{ csrf_token }}"}'>
+  <nav id="site-nav">
+    <a href="/" class="brand">KidsPlay</a>
+    {% if not public_page %}
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="nav-links" aria-expanded="false" aria-label="{{ _('Menu') }}"><span aria-hidden="true">&#9776;</span></button>
+    {% endif %}
+    <div class="nav-links" id="nav-links">
+    {% if not public_page %}
+    <a href="/" {% if active_page == 'dashboard' %}class="active"{% endif %}>{{ _('Dashboard') }}</a>
+    <a href="/media" {% if active_page == 'media' %}class="active"{% endif %}>{{ _('Media') }}</a>
+    <a href="/queue" {% if active_page == 'queue' %}class="active"{% endif %}>{{ _('Queue') }}</a>
+    <a href="/profiles" {% if active_page == 'profiles' %}class="active"{% endif %}>{{ _('Profiles') }}</a>
+    <a href="/devices" {% if active_page == 'devices' %}class="active"{% endif %}>{{ _('Devices') }}</a>
+    <a href="/logs" {% if active_page == 'logs' %}class="active"{% endif %}>{{ _('Logs') }}</a>
+    <a href="/tokens" {% if active_page == 'tokens' %}class="active"{% endif %}>{{ _('API Tokens') }}</a>
+    <a href="/settings" {% if active_page == 'settings' %}class="active"{% endif %}>{{ _('Settings') }}</a>
+    {% if auth_enabled %}<a href="/account" {% if active_page == 'account' %}class="active"{% endif %}>{{ _('Account') }}</a>{% endif %}
+    <span class="spacer"></span>
+    <a href="/docs" class="nav-docs">{{ _('API Docs') }}</a>
+    {% if auth_enabled %}
+    <form method="post" action="/logout">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="link">{{ _('Log out') }}</button>
+    </form>
+    {% endif %}
+    {% endif %}
+    <span class="lang-picker" role="group" aria-label="{{ _('Language') }}">
+      {% for choice in language_choices %}
+      <a href="{{ choice.url }}" lang="{{ choice.code }}" hreflang="{{ choice.code }}"{% if choice.active %} class="active" aria-current="true"{% endif %}>{{ choice.name }}</a>
+      {% endfor %}
+    </span>
+    </div>
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <a href="{{ source_url }}" rel="noopener">{{ _('Source code') }}</a>
+    ({{ _('AGPL-3.0 or later') }})
+  </footer>
+
+  <script>
+    // Text for a failed API response: the translated message for its
+    // error_code when the server has one, else the English detail (importer,
+    // validation and processing messages carry specifics), else the fallback.
+    const API_ERRORS = {{ error_messages|tojson }};
+    function apiDetail(data, fallback) {
+      data = data || {};
+      if (data.error_code && Object.prototype.hasOwnProperty.call(API_ERRORS, data.error_code)) {
+        return API_ERRORS[data.error_code];
+      }
+      if (Array.isArray(data.detail)) return data.detail.map(d => d.msg).join('; ');
+      return data.detail || fallback || '';
+    }
+
+    // Admin auth: send the session's CSRF token on every same-origin
+    // state-changing fetch() (HTMX gets it from hx-headers on <body>), and go
+    // to the login page if the session has expired.
+    (function () {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
+      const originalFetch = window.fetch.bind(window);
+      function goToLogin() {
+        window.location.href = '/login?next=' +
+          encodeURIComponent(window.location.pathname + window.location.search);
+      }
+      window.fetch = async function (input, init) {
+        init = init || {};
+        const url = new URL(input instanceof Request ? input.url : input, window.location.href);
+        const sameOrigin = url.origin === window.location.origin;
+        const method = (init.method || (input instanceof Request ? input.method : 'GET')).toUpperCase();
+        if (sameOrigin && !safeMethods.includes(method)) {
+          const headers = new Headers(init.headers || (input instanceof Request ? input.headers : undefined));
+          headers.set('X-CSRF-Token', csrfToken);
+          init = Object.assign({}, init, {headers});
+        }
+        const resp = await originalFetch(input, init);
+        if (sameOrigin && resp.status === 401 && url.pathname !== '/api/v1/auth/login') goToLogin();
+        return resp;
+      };
+      document.addEventListener('htmx:responseError', function (evt) {
+        if (evt.detail.xhr.status === 401) goToLogin();
+      });
+    })();
+
+
+    // Collapsible nav (phones).
+    (function () {
+      const nav = document.getElementById('site-nav');
+      const toggle = document.getElementById('nav-toggle');
+      if (!toggle) {
+        document.getElementById('nav-links').classList.add('always');
+        return;
+      }
+      toggle.addEventListener('click', function () {
+        const open = nav.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(open));
+      });
+      // Escape closes an open menu and hands focus back to its button.
+      document.addEventListener('keydown', function (evt) {
+        if (evt.key !== 'Escape' || !nav.classList.contains('open')) return;
+        nav.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.focus();
+      });
+    })();
+
+    // Stacked-card tables: copy each column heading onto its cells as
+    // data-label, which the phone CSS shows in front of the value. Rows added
+    // later by scripts or HTMX are labelled as they appear.
+    (function () {
+      function labelRow(tr, labels) {
+        Array.from(tr.children).forEach(function (td, i) {
+          if (td.tagName !== 'TD' || td.hasAttribute('colspan')) return;
+          if (labels[i] && !td.hasAttribute('data-label')) td.setAttribute('data-label', labels[i]);
+        });
+      }
+      function labelTable(table) {
+        const heads = table.querySelectorAll('thead th');
+        const labels = Array.from(heads).map(function (th) {
+          return th.hasAttribute('data-nolabel') ? '' : th.textContent.trim();
+        });
+        table.querySelectorAll('tbody tr').forEach(function (tr) { labelRow(tr, labels); });
+        new MutationObserver(function () {
+          table.querySelectorAll('tbody tr').forEach(function (tr) { labelRow(tr, labels); });
+        }).observe(table, {childList: true, subtree: true});
+      }
+      function init() { document.querySelectorAll('table.stack').forEach(labelTable); }
+      init();  // this script sits after the page content, so the tables exist
+    })();
+
+    function showTab(groupId, tabId) {
+      document.querySelectorAll('#' + groupId + ' .tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#' + groupId + '-panes .tab-pane').forEach(p => p.classList.remove('active'));
+      document.querySelector('#' + groupId + ' [data-tab="' + tabId + '"]').classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

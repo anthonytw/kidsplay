@@ -1,0 +1,1173 @@
+{% extends "base.html" %}
+{% block title %} — {% trans %}Import Media{% endtrans %}{% endblock %}
+
+{% block content %}
+<style>
+  .preview-head { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+  .preview-head > div { flex: 1; min-width: 0; }
+  .field-row { display: flex; gap: 0.75rem 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: flex-end; }
+  /* The cropper owns touch gestures on the image (drag to pan, pinch to
+     zoom); everything around it still scrolls the page. */
+  #cropper-wrap { touch-action: none; }
+  .scroll-hint { display: none; }
+  @media (max-width: 600px) {
+    /* The cropper takes every touch on it, so it is inset (base.html) and the
+       page scrolls from the strips beside it; say so. */
+    .scroll-hint { display: block; }
+    .preview-head { flex-direction: column; }
+    .preview-head img { width: 100% !important; height: auto !important; max-height: 220px; }
+    .field-row > * { flex: 1 1 100% !important; min-width: 0 !important; }
+    .field-row .btn { flex: 1 1 100% !important; }
+    .field-row .field { margin: 0 !important; }
+    .url-row > input { flex: 1 1 100% !important; }
+    .url-row > .btn { flex: 1 1 100%; }
+    .crop-actions .btn { flex: 1 1 auto; }
+    #yt-max-items { width: 5rem !important; }
+    #yt-debug pre { max-width: 100%; }
+    /* One playlist track per card: checkbox beside title, artist, length. */
+    table.track-list.stack tbody tr { display: grid; grid-template-columns: 44px 1fr; column-gap: 0.5rem; }
+    table.track-list.stack td { border-bottom: none; padding: 0.15rem 0; }
+    table.track-list.stack td:nth-child(1) { grid-row: 1 / span 3; align-self: start; padding: 0; }
+    table.track-list.stack td:nth-child(2) { display: none; }
+    table.track-list.stack td:nth-child(n+3) { grid-column: 2; }
+    table.track-list.stack td:nth-child(3), table.track-list.stack td:nth-child(4) { flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 0.15rem; }
+    table.track-list.stack td:nth-child(5) { white-space: normal !important; }
+    table.track-list.stack thead th.col-select { padding: 0 0.75rem 0 0; width: auto !important; }
+    /* The checkbox column has no label, and the label of a stacked column
+       (a row-direction 7.5rem basis) would be that tall in these column cells. */
+    table.track-list.stack td:nth-child(1)::before { content: none; }
+    table.track-list.stack td::before { flex: 0 0 auto; }
+  }
+</style>
+<div class="page-header">
+  <h1>{% trans %}Import Media{% endtrans %}</h1>
+  <a href="/media" class="btn btn-secondary">← {% trans %}Back to Library{% endtrans %}</a>
+</div>
+
+<div id="import-tabs" class="tabs">
+  <button class="tab-btn active" data-tab="tab-smart" onclick="showTab('import-tabs','tab-smart')">{% trans %}Quick Import{% endtrans %}</button>
+  {% if preview_label %}
+  <button class="tab-btn" data-tab="tab-youtube" onclick="showTab('import-tabs','tab-youtube')">{{ preview_label }}</button>
+  {% endif %}
+  <button class="tab-btn" data-tab="tab-photo" onclick="showTab('import-tabs','tab-photo')">{% trans %}Photo{% endtrans %}</button>
+  <button class="tab-btn" data-tab="tab-bulk" onclick="showTab('import-tabs','tab-bulk')">{% trans %}Bulk Filesystem{% endtrans %}</button>
+  <button class="tab-btn" data-tab="tab-archive" onclick="showTab('import-tabs','tab-archive')">{% trans %}Archive Upload{% endtrans %}</button>
+</div>
+
+<div id="import-tabs-panes">
+
+  <!-- ================================================================ -->
+  <!-- TAB 0: Quick Import (smart paste)                                -->
+  <!-- ================================================================ -->
+  <div class="tab-pane active" id="tab-smart">
+    <div class="card">
+      <p style="color:#666; margin-bottom:1rem;">
+        {% if preview_label %}{% trans label=preview_label %}Paste a <strong>{{ label }} URL</strong> to import audio, or an <strong>image URL</strong> to import a photo.{% endtrans %}{% else %}{% trans %}Paste an <strong>image URL</strong> to import a photo.{% endtrans %}{% endif %}
+        {% trans %}You can also <strong>paste an image directly</strong> from your clipboard (Ctrl+V / Cmd+V).{% endtrans %}
+      </p>
+      <div class="field-inline url-row">
+        <input type="url" id="smart-input" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off"
+
+               placeholder="{% if preview_label %}{{ _('%(label)s or image URL', label=preview_label) }}{% else %}{{ _('https://example.com/photo.jpg') }}{% endif %}"
+               style="flex:1;"
+               onkeydown="if(event.key==='Enter') smartGo()"
+               onpaste="setTimeout(smartGo, 0)">
+        <button class="btn btn-primary" onclick="smartGo()">{% trans %}Go{% endtrans %}</button>
+      </div>
+      <div id="smart-status" class="hidden" style="margin-top:0.75rem;"></div>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- TAB 1: preview-and-queue import                                  -->
+  <!-- ================================================================ -->
+  {# Only rendered when an installed importer supports previews. #}
+  {% if preview_label %}
+  <div class="tab-pane" id="tab-youtube">
+    <div class="card">
+      <div class="field">
+        <label for="yt-url">{% trans label=preview_label %}{{ label }} URL (video or playlist){% endtrans %}</label>
+        <div class="field-inline url-row">
+          <input type="url" id="yt-url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="https://…" style="flex:1;">
+          <button class="btn btn-primary" onclick="ytPreview()" id="yt-preview-btn">{% trans %}Preview{% endtrans %}</button>
+        </div>
+        <p style="font-size:0.78rem; color:#888; margin-top:0.4rem;">
+          {% set radio_example %}<code>{{ '&list=RD…&start_radio=1' }}</code>{% endset %}
+          {% set max_items_field %}<label style="display:inline;">
+            <input type="number" inputmode="numeric" id="yt-max-items" min="1" value="50"
+                   style="width:64px; padding:2px 6px;"> {{ _('tracks') }}
+          </label>{% endset %}
+          {% trans example=radio_example, max_items=max_items_field %}Radio/mix links ({{ example }}) are trimmed to the single video automatically. For a real playlist, at most {{ max_items }} are fetched for preview — raise this and press Preview again to see more.{% endtrans %}
+        </p>
+      </div>
+      <div id="yt-status" class="hidden"></div>
+      <details id="yt-debug" style="margin-top:0.75rem; display:none;">
+        <summary style="cursor:pointer; font-size:0.8rem; color:#666; user-select:none;">
+          {% trans %}Debug info{% endtrans %}
+        </summary>
+        <div style="margin-top:0.5rem; background:#f7f7fa; border-radius:4px; padding:0.75rem; font-size:0.78rem;">
+          <div style="margin-bottom:0.4rem;">
+            <strong>{% trans %}Command{% endtrans %}</strong>
+            <button onclick="copyDebugCmd()" class="btn btn-secondary btn-sm" style="margin-left:0.5rem;">{% trans %}Copy{% endtrans %}</button>
+          </div>
+          <pre id="yt-debug-cmd" style="white-space:pre-wrap; word-break:break-all; margin-bottom:0.75rem; background:#fff; border:1px solid #e0e0e8; border-radius:3px; padding:0.5rem;"></pre>
+          <div><strong>{% trans %}Return code:{% endtrans %}</strong> <span id="yt-debug-rc"></span></div>
+          <div style="margin-top:0.5rem;"><strong>{% trans %}stderr{% endtrans %}</strong></div>
+          <pre id="yt-debug-stderr" style="white-space:pre-wrap; word-break:break-all; max-height:200px; overflow-y:auto; background:#fff; border:1px solid #e0e0e8; border-radius:3px; padding:0.5rem; margin-top:0.25rem; color:#666;"></pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- Preview card for single video -->
+    <div id="yt-single" class="card hidden">
+      <h2>{% trans %}Preview{% endtrans %}</h2>
+      <div class="preview-head">
+        <img id="yt-thumb" src="" alt="" style="width:120px; height:90px; object-fit:cover; border-radius:4px; display:none;">
+        <div style="flex:1;">
+          <div class="field">
+            <label>{% trans %}Title{% endtrans %}</label>
+            <input type="text" id="yt-title">
+          </div>
+          <div class="field">
+            <label>{% trans %}Artist{% endtrans %}</label>
+            <input type="text" id="yt-artist">
+          </div>
+          <div id="yt-duration" style="font-size:0.8rem; color:#888; margin-bottom:0.5rem;"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>{% trans %}Media type{% endtrans %}</label>
+        <select id="yt-media-type" style="width:200px;">
+          <option value="music">{% trans %}Music{% endtrans %}</option>
+          <option value="audiobook">{% trans %}Audiobook{% endtrans %}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>{% trans %}Playlist / group title{% endtrans %}</label>
+        <input type="text" id="yt-playlist-title" placeholder="{{ _('e.g. Favourite Songs') }}" list="playlist-titles">
+      </div>
+      <div class="field">
+        <label>{% trans %}Assign to profiles{% endtrans %}</label>
+        <ul class="checklist" id="yt-profiles-single">
+          {% for p in profiles %}
+          <li><label><input type="checkbox" name="profile_ids" value="{{ p.id }}"> {{ p.name }}</label></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <button class="btn btn-primary" onclick="ytQueueSingle()">{% trans %}Add to queue{% endtrans %}</button>
+      <span id="yt-import-spinner" class="hidden" style="margin-left:0.5rem; color:#888; font-size:0.83rem;">{% trans %}Submitting…{% endtrans %}</span>
+      <div id="yt-import-result" class="hidden" style="margin-top:0.75rem;"></div>
+    </div>
+
+    <!-- Preview for playlist -->
+    <div id="yt-playlist" class="card hidden">
+      <h2 id="yt-playlist-name">{% trans %}Playlist{% endtrans %}</h2>
+      <p id="yt-pl-count" class="hidden" style="font-size:0.85rem; color:#444; margin-bottom:0.4rem;"></p>
+      <p style="font-size:0.83rem; color:#666; margin-bottom:0.75rem;">
+        {% trans %}Uncheck any tracks you do not want to import.{% endtrans %}
+      </p>
+      <div class="field-row">
+        <div class="field" style="margin:0; flex:1; min-width:200px;">
+          <label>{% trans %}Playlist / book title{% endtrans %}</label>
+          <input type="text" id="yt-pl-title" list="playlist-titles">
+        </div>
+        <div class="field" style="margin:0; flex:0 0 auto;">
+          <label>{% trans %}Media type{% endtrans %}</label>
+          <select id="yt-pl-media-type" style="width:160px;">
+            <option value="music">{% trans %}Music{% endtrans %}</option>
+            <option value="audiobook">{% trans %}Audiobook{% endtrans %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>{% trans %}Assign to profiles{% endtrans %}</label>
+        <ul class="checklist" id="yt-profiles-playlist">
+          {% for p in profiles %}
+          <li><label><input type="checkbox" name="profile_ids_pl" value="{{ p.id }}"> {{ p.name }}</label></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="field-row">
+        <div class="field" style="margin:0; flex:1; min-width:200px;">
+          <label>{% trans %}Set artist for all tracks{% endtrans %}</label>
+          <input type="text" id="yt-pl-artist-all" placeholder="{{ _('e.g. Michael Jackson') }}">
+        </div>
+        <button type="button" class="btn btn-secondary" style="flex:0 0 auto;" onclick="ytApplyArtistAll()">{% trans %}Apply to all{% endtrans %}</button>
+        <button type="button" class="btn btn-secondary" style="flex:0 0 auto;" onclick="ytRemoveDuplicates()">{% trans %}Remove duplicates{% endtrans %}</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="track-list stack" id="yt-track-table">
+          <thead>
+            <tr>
+              <th class="col-select" style="width:32px;"><label class="check-hit"><input type="checkbox" id="yt-check-all" checked onchange="ytToggleAll(this.checked)" title="{{ _('Select all') }}"><span class="check-hit-text">{{ _('Select all') }}</span></label></th>
+              <th>#</th>
+              <th>{% trans %}Title{% endtrans %}</th>
+              <th>{% trans %}Artist{% endtrans %}</th>
+              <th>{% trans %}Duration{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody id="yt-tracks"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:1rem; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="ytQueuePlaylist()">{% trans %}Queue selected tracks{% endtrans %}</button>
+        <span id="yt-pl-progress" class="hidden" style="font-size:0.83rem; color:#444;">
+          <span id="yt-pl-done">0</span> / <span id="yt-pl-total">0</span> {% trans %}done{% endtrans %}
+          <span id="yt-pl-failed" style="color:#dc3545;"></span>
+        </span>
+      </div>
+      <div class="progress-bar-wrap hidden" id="yt-pl-bar-wrap" style="margin-top:0.5rem;">
+        <div class="progress-bar" id="yt-pl-bar" style="width:0%"></div>
+      </div>
+      <div id="yt-pl-result" class="hidden" style="margin-top:0.75rem;"></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ================================================================ -->
+  <!-- TAB 2: Photo import with Cropper.js                             -->
+  <!-- ================================================================ -->
+  <div class="tab-pane" id="tab-photo">
+    <div class="card">
+      <div class="tabs" id="photo-src-tabs" style="margin-bottom:1rem;">
+        <button class="tab-btn active" data-tab="photo-from-url" onclick="showTab('photo-src-tabs','photo-from-url')">{% trans %}From URL{% endtrans %}</button>
+        <button class="tab-btn" data-tab="photo-from-file" onclick="showTab('photo-src-tabs','photo-from-file')">{% trans %}Upload file{% endtrans %}</button>
+      </div>
+      <div id="photo-src-tabs-panes">
+        <div class="tab-pane active" id="photo-from-url">
+          <div class="field-inline url-row" style="margin-bottom:0;">
+            <input type="url" id="photo-url-input" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="{{ _('https://example.com/image.jpg') }}" style="flex:1;">
+            <button class="btn btn-primary" onclick="loadPhotoFromUrl()">{% trans %}Load{% endtrans %}</button>
+          </div>
+        </div>
+        <div class="tab-pane" id="photo-from-file">
+          <input type="file" id="photo-file-input" accept="image/*" multiple onchange="loadPhotoFromFile(event)">
+          <p id="photo-queue-hint" class="hidden" style="font-size:0.83rem; color:#666; margin-top:0.5rem;"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="cropper-card">
+      <h2>{% trans %}Crop (4:3 — 640×480){% endtrans %}</h2>
+      <p style="font-size:0.83rem; color:#666; margin-bottom:0.75rem;">
+        {% trans %}Drag to reposition, scroll or pinch to zoom. <strong>Fit</strong> shows the whole image (empty space on the sides); zoom in from there to crop. Only the overflowing side is constrained, so it can’t be pushed off-centre.{% endtrans %}
+      </p>
+      <p class="scroll-hint" style="font-size:0.78rem; color:#666; margin-bottom:0.5rem;">
+        {% trans %}To scroll the page, drag from the margins beside the photo.{% endtrans %}
+      </p>
+      <div id="cropper-wrap">
+        <img id="crop-image" src="" alt="{{ _('photo') }}">
+      </div>
+      <div class="crop-actions" style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="cropFit()" id="crop-fit-btn">{% trans %}Fit whole image{% endtrans %}</button>
+        <button class="btn btn-secondary btn-sm" onclick="cropReset()">{% trans %}Reset crop{% endtrans %}</button>
+      </div>
+
+      <hr style="margin:1rem 0; border:none; border-top:1px solid #e8e8f0;">
+
+      <div class="field">
+        <label>{% trans %}Photo title{% endtrans %}</label>
+        <input type="text" id="photo-title" placeholder="{{ _('e.g. Beach Day') }}">
+      </div>
+      <div class="field">
+        <label>{% trans %}Playlist / album title{% endtrans %}</label>
+        <input type="text" id="photo-playlist-title" placeholder="{{ _('e.g. Summer 2024') }}" list="playlist-titles">
+      </div>
+      <div class="field">
+        <label>{% trans %}Assign to profiles{% endtrans %}</label>
+        <ul class="checklist" id="photo-profiles">
+          {% for p in profiles %}
+          <li><label><input type="checkbox" name="photo_profile_ids" value="{{ p.id }}"> {{ p.name }}</label></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <button class="btn btn-primary" onclick="photoImport()">{% trans %}Import photo{% endtrans %}</button>
+      <span id="photo-spinner" class="hidden" style="margin-left:0.5rem; color:#888; font-size:0.83rem;">{% trans %}Importing…{% endtrans %}</span>
+      <div id="photo-result" class="hidden" style="margin-top:0.75rem;"></div>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- TAB 3: Bulk filesystem import                                    -->
+  <!-- ================================================================ -->
+  <div class="tab-pane" id="tab-bulk">
+    <div class="card">
+      <form id="bulk-form">
+        <div class="field">
+          <label for="bulk-path">{% trans %}Server-side path{% endtrans %}</label>
+          <input type="text" id="bulk-path" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="{{ _('/mnt/source/music') }}">
+          <small style="color:#888;">{% trans %}Absolute path accessible to the server. Directories are walked recursively.{% endtrans %}</small>
+        </div>
+        <div class="field">
+          <label>{% trans %}Media type{% endtrans %}</label>
+          <select id="bulk-media-type" style="width:200px;">
+            <option value="music">{% trans %}Music{% endtrans %}</option>
+            <option value="audiobook">{% trans %}Audiobook{% endtrans %}</option>
+            <option value="photo">{% trans %}Photo{% endtrans %}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>{% trans %}Playlist / group title{% endtrans %}</label>
+          <input type="text" id="bulk-playlist-title" placeholder="{{ _('e.g. My Music Collection') }}" list="playlist-titles">
+        </div>
+        <div class="field">
+          <label>{% trans %}Assign to profiles{% endtrans %}</label>
+          <ul class="checklist" id="bulk-profiles">
+            {% for p in profiles %}
+            <li><label><input type="checkbox" name="bulk_profile_ids" value="{{ p.id }}"> {{ p.name }}</label></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="bulkImport()">{% trans %}Start import{% endtrans %}</button>
+        <span id="bulk-spinner" class="hidden" style="margin-left:0.5rem; color:#888; font-size:0.83rem;">{% trans %}Importing…{% endtrans %}</span>
+      </form>
+      <div id="bulk-result" class="hidden" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================ -->
+  <!-- TAB 4: Archive upload (zip / tar)                                -->
+  <!-- ================================================================ -->
+  <div class="tab-pane" id="tab-archive">
+    <div class="card">
+      <p style="font-size:0.83rem; color:#888; margin-bottom:1rem;">
+        {% trans %}Upload a <strong>.zip</strong>, <strong>.tar.gz</strong>, <strong>.tgz</strong>, <strong>.tar.bz2</strong>, or <strong>.tar.xz</strong> archive.{% endtrans %}
+        {% trans %}Files inside subdirectories will use the <em>directory name</em> as the playlist title.{% endtrans %}
+        {% trans %}Root-level files use the fallback title below.{% endtrans %}
+      </p>
+      <div class="field">
+        <label for="arc-file">{% trans %}Archive file{% endtrans %}</label>
+        <input type="file" id="arc-file"
+               accept=".zip,.tar,.tar.gz,.tgz,.tar.bz2,.tar.xz"
+               onchange="arcFileSelected(event)">
+        <small id="arc-file-hint" style="color:#888; display:none;"></small>
+      </div>
+      <div class="field">
+        <label>{% trans %}Media type{% endtrans %}</label>
+        <select id="arc-media-type" style="width:200px;">
+          <option value="music">{% trans %}Music{% endtrans %}</option>
+          <option value="audiobook">{% trans %}Audiobook{% endtrans %}</option>
+          <option value="photo">{% trans %}Photo{% endtrans %}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="arc-playlist-title">{% trans %}Fallback playlist / group title{% endtrans %}</label>
+        <input type="text" id="arc-playlist-title" placeholder="{{ _('e.g. My Music Collection') }}" list="playlist-titles">
+        <small style="color:#888;">{% trans %}Used for files at the archive root (no subdirectory). Defaults to the archive filename.{% endtrans %}</small>
+      </div>
+      <div class="field">
+        <label>{% trans %}Assign to profiles{% endtrans %}</label>
+        <ul class="checklist" id="arc-profiles">
+          {% for p in profiles %}
+          <li><label><input type="checkbox" name="arc_profile_ids" value="{{ p.id }}"> {{ p.name }}</label></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+        <button type="button" class="btn btn-primary" onclick="archiveImport()" id="arc-submit-btn">{% trans %}Upload & Import{% endtrans %}</button>
+        <span id="arc-spinner" class="hidden" style="color:#888; font-size:0.83rem;">{% trans %}Uploading…{% endtrans %}</span>
+      </div>
+      <div class="progress-bar-wrap hidden" id="arc-progress-wrap" style="margin-top:0.5rem;">
+        <div class="progress-bar" id="arc-progress-bar" style="width:0%"></div>
+      </div>
+      <div id="arc-result" class="hidden" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+</div><!-- /#import-tabs-panes -->
+{% endblock %}
+
+{% block scripts %}
+<!-- Existing playlist titles, suggested by every playlist-title field above. -->
+<datalist id="playlist-titles">
+  {% for pl in distinct_playlists %}<option value="{{ pl }}">{% endfor %}
+</datalist>
+
+<script>
+// ---------------------------------------------------------------------------
+// Translated messages (placeholders such as {count} are filled in by fmt())
+// ---------------------------------------------------------------------------
+// Default playlist titles are stored with the media, so they stay English
+// whatever language the page is in (they are data, not interface text).
+const DEFAULT_TITLE = {
+  playlist: {{ 'Playlist'|tojson }},
+  photos: {{ 'Photos'|tojson }},
+  import: {{ 'Import'|tojson }},
+};
+
+const T = {
+  fetching: {{ _('Fetching metadata…')|tojson }},
+  networkError: {{ _('Network error: {error}')|tojson }},
+  networkErrorPlain: {{ _('Network error')|tojson }},
+  previewFailed: {{ _('Preview failed: {detail}')|tojson }},
+  durationLabel: {{ _('Duration: {duration}')|tojson }},
+  playlist: {{ _('Playlist')|tojson }},
+  empty: {{ _('(empty)')|tojson }},
+  many: {{ _('many')|tojson }},
+  showingOf: {{ _('Showing {shown} of {total} tracks.')|tojson }},
+  uncheckMore: {{ _('Uncheck to import fewer, or raise the max above and Preview again to fetch more.')|tojson }},
+  tracksInList: {{ _('Tracks in this list: {count}')|tojson }},
+  removedOne: {{ _('Removed 1 duplicate.')|tojson }},
+  removedMany: {{ _('Removed {count} duplicates.')|tojson }},
+  noDuplicates: {{ _('No duplicates found.')|tojson }},
+  queued: {{ _('Queued for import.')|tojson }},
+  viewQueue: {{ _('View queue')|tojson }},
+  failedToQueue: {{ _('Failed to queue: {detail}')|tojson }},
+  noTracksSelected: {{ _('No tracks selected.')|tojson }},
+  failedCount: {{ _('({count} failed)')|tojson }},
+  tracksQueuedOne: {{ _('1 track queued.')|tojson }},
+  tracksQueuedMany: {{ _('{count} tracks queued.')|tojson }},
+  countFailedToQueue: {{ _('{count} failed to queue.')|tojson }},
+  allFailed: {{ _('All tracks failed to queue.')|tojson }},
+  photoOfTotal: {{ _('Photo {n} of {total}')|tojson }},
+  loadImageFirst: {{ _('Load an image first.')|tojson }},
+  couldNotLoadImage: {{ _('Could not load image: {status}')|tojson }},
+  errorPlain: {{ _('Error: {detail}')|tojson }},
+  noImage: {{ _('No image available to upload.')|tojson }},
+  photoImported: {{ _('Photo imported.')|tojson }},
+  photoDuplicate: {{ _('Photo already in library (duplicate).')|tojson }},
+  importFailed: {{ _('Import failed: {detail}')|tojson }},
+  couldNotDetect: {{ _('Could not detect URL type. Try the other tabs manually.')|tojson }},
+  selectArchive: {{ _('Select an archive file first.')|tojson }},
+  invalidJson: {{ _('Invalid JSON response')|tojson }},
+  uploadFailed: {{ _('Upload failed')|tojson }},
+  importDone: {{ _('Done. Files found: {total}. Imported: {imported}, skipped: {skipped}, failed: {failed}.')|tojson }},
+  enterPath: {{ _('Enter a server-side path.')|tojson }},
+};
+
+// Replace {name} placeholders in a translated message.
+function fmt(msg, values) {
+  return msg.replace(/\{(\w+)\}/g, (m, k) => (k in values ? values[k] : m));
+}
+
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+function setStatus(el, msg, type) {
+  el.className = 'alert alert-' + type;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function fmtDuration(secs) {
+  if (!secs) return '';
+  const m = Math.floor(secs / 60), s = Math.floor(secs % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function checkedValues(name) {
+  return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked'))
+    .map(el => el.value);
+}
+
+// ---------------------------------------------------------------------------
+// Importer preview (video/playlist sources)
+// ---------------------------------------------------------------------------
+let ytTracks = [];
+let ytTotalAvailable = null;
+let ytTruncated = false;
+
+function showDebug(debug) {
+  if (!debug) return;
+  const el = document.getElementById('yt-debug');
+  document.getElementById('yt-debug-cmd').textContent = (debug.command || []).join(' ');
+  document.getElementById('yt-debug-rc').textContent = debug.returncode ?? '';
+  document.getElementById('yt-debug-stderr').textContent = debug.stderr || T.empty;
+  el.style.display = '';
+}
+
+function copyDebugCmd() {
+  const text = document.getElementById('yt-debug-cmd').textContent;
+  navigator.clipboard.writeText(text).catch(() => {});
+}
+
+async function ytPreview() {
+  const url = document.getElementById('yt-url').value.trim();
+  if (!url) return;
+  const status = document.getElementById('yt-status');
+  setStatus(status, T.fetching, 'info');
+  document.getElementById('yt-single').classList.add('hidden');
+  document.getElementById('yt-playlist').classList.add('hidden');
+  document.getElementById('yt-debug').style.display = 'none';
+
+  const maxRaw = parseInt(document.getElementById('yt-max-items').value, 10);
+  const maxItems = Number.isFinite(maxRaw) && maxRaw > 0 ? maxRaw : null;
+
+  let data, resp;
+  try {
+    resp = await fetch('/api/v1/media/preview', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url, max_items: maxItems}),
+    });
+    data = await resp.json();
+  } catch(e) {
+    setStatus(status, fmt(T.networkError, {error: e}), 'error');
+    return;
+  }
+
+  // Always show debug info when present (success or failure).
+  showDebug(data.debug);
+
+  if (!resp.ok) {
+    setStatus(status, fmt(T.previewFailed, {detail: apiDetail(data, resp.statusText)}), 'error');
+    return;
+  }
+  status.classList.add('hidden');
+
+  if (data.is_playlist) {
+    showPlaylistPreview(data);
+  } else if (data.tracks && data.tracks.length > 0) {
+    showSinglePreview(data.tracks[0]);
+  }
+}
+
+function showSinglePreview(track) {
+  document.getElementById('yt-title').value = track.title || '';
+  document.getElementById('yt-artist').value = track.artist || '';
+  document.getElementById('yt-playlist-title').value = track.artist || '';
+  document.getElementById('yt-duration').textContent =
+    track.duration_seconds ? fmt(T.durationLabel, {duration: fmtDuration(track.duration_seconds)}) : '';
+  const thumb = document.getElementById('yt-thumb');
+  if (track.thumbnail_url) {
+    thumb.src = track.thumbnail_url;
+    thumb.style.display = 'block';
+  } else {
+    thumb.style.display = 'none';
+  }
+  document.getElementById('yt-import-result').classList.add('hidden');
+  document.getElementById('yt-single').classList.remove('hidden');
+  // stash url for import
+  document.getElementById('yt-single').dataset.url = track.url;
+}
+
+function showPlaylistPreview(data) {
+  ytTracks = data.tracks || [];
+  document.getElementById('yt-playlist-name').textContent = data.playlist_title || T.playlist;
+  document.getElementById('yt-pl-title').value = data.playlist_title || '';
+
+  ytTotalAvailable = (typeof data.total_available === 'number') ? data.total_available : null;
+  ytTruncated = !!data.truncated;
+  document.getElementById('yt-pl-artist-all').value = '';
+  ytRenderTracks();
+  document.getElementById('yt-pl-result').classList.add('hidden');
+  document.getElementById('yt-playlist').classList.remove('hidden');
+}
+
+// Render the ytTracks array into the track table. Each track's title/artist
+// come from the array (so edits survive a re-render) and its checkbox honours
+// the stored t._checked flag (defaults to selected).
+function ytRenderTracks(noteHtml) {
+  const shown = ytTracks.length;
+  const countEl = document.getElementById('yt-pl-count');
+  let msg;
+  if (ytTruncated) {
+    const totalTxt = (ytTotalAvailable !== null) ? String(ytTotalAvailable) : T.many;
+    msg = '<strong>' + fmt(T.showingOf, {shown: shown, total: totalTxt}) +
+      '</strong> ' + T.uncheckMore;
+  } else {
+    msg = '<strong>' + fmt(T.tracksInList, {count: shown}) + '</strong>';
+  }
+  if (noteHtml) msg += ' <span style="color:#0a7d33;">' + noteHtml + '</span>';
+  countEl.innerHTML = msg;
+  countEl.classList.remove('hidden');
+
+  const tbody = document.getElementById('yt-tracks');
+  tbody.innerHTML = '';
+  ytTracks.forEach((t, i) => {
+    const checked = (t._checked === false) ? '' : ' checked';
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><label class="check-hit"><input type="checkbox" class="yt-track-check" data-idx="' + i + '"' + checked + '></label></td>' +
+      '<td>' + (i + 1) + '</td>' +
+      '<td><input type="text" class="yt-track-title" data-idx="' + i + '" value="' + esc(t.title) + '"></td>' +
+      '<td><input type="text" class="yt-track-artist" data-idx="' + i + '" value="' + esc(t.artist) + '"></td>' +
+      '<td style="white-space:nowrap;">' + fmtDuration(t.duration_seconds) + '</td>';
+    tbody.appendChild(tr);
+  });
+  const allBox = document.getElementById('yt-check-all');
+  if (allBox) allBox.checked = ytTracks.every(t => t._checked !== false);
+}
+
+// Pull the current DOM edits (title, artist, checked) back into ytTracks so
+// they survive the next re-render.
+function ytSyncEdits() {
+  ytTracks.forEach((t, i) => {
+    const titleEl = document.querySelector('.yt-track-title[data-idx="' + i + '"]');
+    const artistEl = document.querySelector('.yt-track-artist[data-idx="' + i + '"]');
+    const checkEl = document.querySelector('.yt-track-check[data-idx="' + i + '"]');
+    if (titleEl) t.title = titleEl.value;
+    if (artistEl) t.artist = artistEl.value;
+    if (checkEl) t._checked = checkEl.checked;
+  });
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+
+function ytToggleAll(checked) {
+  document.querySelectorAll('.yt-track-check').forEach(cb => cb.checked = checked);
+}
+
+// Set every track's artist field to the "artist for all" value.
+function ytApplyArtistAll() {
+  const val = document.getElementById('yt-pl-artist-all').value.trim();
+  ytSyncEdits();
+  ytTracks.forEach(t => { t.artist = val; });
+  ytRenderTracks();
+}
+
+// Drop tracks whose (case-insensitive, trimmed) title already appeared, keeping
+// the first occurrence. Reads current edits first so renamed titles are honoured.
+function ytRemoveDuplicates() {
+  ytSyncEdits();
+  const seen = new Set();
+  const before = ytTracks.length;
+  ytTracks = ytTracks.filter(t => {
+    const key = (t.title || '').trim().toLowerCase();
+    if (key && seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const removed = before - ytTracks.length;
+  const note = removed ? (removed === 1 ? T.removedOne : fmt(T.removedMany, {count: removed}))
+                       : T.noDuplicates;
+  ytRenderTracks(note);
+}
+
+async function ytQueueSingle() {
+  const url = document.getElementById('yt-single').dataset.url;
+  const title = document.getElementById('yt-title').value.trim();
+  const artist = document.getElementById('yt-artist').value.trim();
+  const mediaType = document.getElementById('yt-media-type').value;
+  const playlistTitle = document.getElementById('yt-playlist-title').value.trim() || title;
+  const profileIds = checkedValues('profile_ids');
+
+  const spinner = document.getElementById('yt-import-spinner');
+  const result = document.getElementById('yt-import-result');
+  spinner.classList.remove('hidden');
+  result.classList.add('hidden');
+
+  try {
+    const resp = await fetch('/api/v1/queue', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        url: url,
+        media_type: mediaType,
+        playlist_title: playlistTitle,
+        profile_ids: profileIds,
+        title_override: title || null,
+        artist_override: artist || null,
+      }),
+    });
+    spinner.classList.add('hidden');
+    if (resp.ok) {
+      result.className = 'alert alert-success';
+      result.innerHTML = '&#10003; ' + T.queued + ' <a href="/queue">' + T.viewQueue + '</a>';
+      result.classList.remove('hidden');
+    } else {
+      const data = await resp.json();
+      setStatus(result, fmt(T.failedToQueue, {detail: apiDetail(data, resp.statusText)}), 'error');
+    }
+  } catch(e) {
+    spinner.classList.add('hidden');
+    setStatus(result, fmt(T.networkError, {error: e}), 'error');
+  }
+}
+
+async function ytQueuePlaylist() {
+  const checked = Array.from(document.querySelectorAll('.yt-track-check:checked'));
+  if (!checked.length) { alert(T.noTracksSelected); return; }
+
+  const playlistTitle = document.getElementById('yt-pl-title').value.trim() || DEFAULT_TITLE.playlist;
+  const mediaType = document.getElementById('yt-pl-media-type').value;
+  const profileIds = checkedValues('profile_ids_pl');
+
+  const total = checked.length;
+  let done = 0, failed = 0;
+
+  document.getElementById('yt-pl-total').textContent = total;
+  document.getElementById('yt-pl-done').textContent = 0;
+  document.getElementById('yt-pl-failed').textContent = '';
+  document.getElementById('yt-pl-progress').classList.remove('hidden');
+  document.getElementById('yt-pl-bar-wrap').classList.remove('hidden');
+  document.getElementById('yt-pl-result').classList.add('hidden');
+
+  for (const cb of checked) {
+    const idx = parseInt(cb.dataset.idx);
+    const track = ytTracks[idx];
+    const titleEl = document.querySelector('.yt-track-title[data-idx="' + idx + '"]');
+    const artistEl = document.querySelector('.yt-track-artist[data-idx="' + idx + '"]');
+
+    const trackTitle = titleEl ? titleEl.value.trim() : '';
+    const trackArtist = artistEl ? artistEl.value.trim() : '';
+    try {
+      const resp = await fetch('/api/v1/queue', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          url: track.url,
+          media_type: mediaType,
+          playlist_title: playlistTitle,
+          profile_ids: profileIds,
+          title_override: trackTitle || null,
+          artist_override: trackArtist || null,
+        }),
+      });
+      if (!resp.ok) failed++;
+    } catch(e) {
+      failed++;
+    }
+    done++;
+    document.getElementById('yt-pl-done').textContent = done;
+    if (failed) document.getElementById('yt-pl-failed').textContent = ' ' + fmt(T.failedCount, {count: failed});
+    document.getElementById('yt-pl-bar').style.width = Math.round(done / total * 100) + '%';
+  }
+
+  const result = document.getElementById('yt-pl-result');
+  const ok = done - failed;
+  if (ok > 0) {
+    result.className = 'alert alert-' + (failed ? 'error' : 'success');
+    result.innerHTML = '&#10003; ' + (ok > 1 ? fmt(T.tracksQueuedMany, {count: ok}) : T.tracksQueuedOne) +
+      (failed ? ' ' + fmt(T.countFailedToQueue, {count: failed}) : '') +
+      ' <a href="/queue">' + T.viewQueue + '</a>';
+    result.classList.remove('hidden');
+  } else {
+    setStatus(result, T.allFailed, 'error');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Photo import / Cropper.js
+// ---------------------------------------------------------------------------
+let cropper = null;
+let _constraining = false;
+
+// The crop box is a fixed 4:3 frame (the 640×480 output). The image pans/zooms
+// behind it. This keeps the image constrained *per axis*: on an axis where the
+// image is smaller than the box it is centred (symmetric empty space — never
+// de-centred, so it never renders offset on the device); on an axis where the
+// image covers the box it is clamped so no empty space is introduced. Only the
+// axis that overflows needs to constrain, so zooming out to reveal empty space
+// on the other axis is allowed.
+function constrainCanvas() {
+  if (!cropper || _constraining) return;
+  const box = cropper.getCropBoxData();
+  const c = cropper.getCanvasData();
+  let left = c.left;
+  let top = c.top;
+
+  if (c.width <= box.width) {
+    left = box.left + (box.width - c.width) / 2;            // centre horizontally
+  } else {
+    const min = box.left + box.width - c.width;             // image covers box
+    left = Math.min(box.left, Math.max(min, left));
+  }
+  if (c.height <= box.height) {
+    top = box.top + (box.height - c.height) / 2;            // centre vertically
+  } else {
+    const min = box.top + box.height - c.height;
+    top = Math.min(box.top, Math.max(min, top));
+  }
+
+  if (Math.abs(left - c.left) > 0.5 || Math.abs(top - c.top) > 0.5) {
+    _constraining = true;
+    cropper.setCanvasData({ left, top });
+    _constraining = false;
+  }
+}
+
+// Fit the whole image inside the box (letterboxed, centred) and update the crop
+// live, so the user can then zoom in / reposition from there.
+function cropFit() {
+  if (!cropper) { alert(T.loadImageFirst); return; }
+  const box = cropper.getCropBoxData();
+  const data = cropper.getImageData();
+  const scale = Math.min(box.width / data.naturalWidth, box.height / data.naturalHeight);
+  const width = data.naturalWidth * scale;
+  cropper.setCanvasData({
+    width,
+    left: box.left + (box.width - width) / 2,
+    top: box.top + (box.height - data.naturalHeight * scale) / 2,
+  });
+  constrainCanvas();
+}
+
+function initCropper(src) {
+  const card = document.getElementById('cropper-card');
+  card.classList.remove('hidden');
+  const img = document.getElementById('crop-image');
+  if (cropper) { cropper.destroy(); cropper = null; }
+  img.src = src;
+  img.onload = function() {
+    // viewMode 0 (no built-in restriction) + a per-axis constrainCanvas so the
+    // image can zoom out to leave empty space on one axis while staying centred
+    // there. dragMode 'move' pans the image; the crop box is a fixed frame.
+    cropper = new Cropper(img, {
+      aspectRatio: 4 / 3,
+      viewMode: 0,
+      dragMode: 'move',
+      autoCropArea: 1.0,
+      cropBoxMovable: false,
+      cropBoxResizable: false,
+      toggleDragModeOnDblclick: false,
+      movable: true,
+      zoomable: true,
+      crop() { constrainCanvas(); },
+      ready() {
+        // On a phone the hints above can push the crop frame below the fold
+        // (longer translations wrap more): bring it into view, scrolling only
+        // if it is not already fully visible.
+        document.getElementById('cropper-wrap').scrollIntoView({block: 'nearest'});
+      },
+      zoom(event) {
+        // Cap zoom-out at "one dimension fits the box": stop only when BOTH
+        // dimensions would fall below the box (image floating free). Leaving
+        // empty space on a single axis is allowed.
+        const data = cropper.getImageData();
+        const box = cropper.getCropBoxData();
+        const newW = data.naturalWidth * event.detail.ratio;
+        const newH = data.naturalHeight * event.detail.ratio;
+        if (newW < box.width && newH < box.height) {
+          event.preventDefault();
+        }
+      },
+    });
+  };
+}
+
+async function loadPhotoFromUrl() {
+  const url = document.getElementById('photo-url-input').value.trim();
+  if (!url) return;
+  try {
+    const resp = await fetch('/web/photo-proxy', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url}),
+    });
+    if (!resp.ok) { alert(fmt(T.couldNotLoadImage, {status: resp.status})); return; }
+    const blob = await resp.blob();
+    initCropper(URL.createObjectURL(blob));
+    // store original url for later upload
+    document.getElementById('cropper-card').dataset.sourceUrl = url;
+    document.getElementById('cropper-card').dataset.sourceType = 'url';
+  } catch(e) {
+    alert(fmt(T.errorPlain, {detail: e}));
+  }
+}
+
+// Files chosen in the upload tab (several can be picked from a phone's camera
+// roll); they are cropped and imported one after another.
+let photoQueue = [];
+let photoQueueIndex = 0;
+
+function showQueuedPhoto(index) {
+  const file = photoQueue[index];
+  if (!file) return;
+  photoQueueIndex = index;
+  const hint = document.getElementById('photo-queue-hint');
+  if (photoQueue.length > 1) {
+    hint.textContent = fmt(T.photoOfTotal, {n: index + 1, total: photoQueue.length});
+    hint.classList.remove('hidden');
+  } else {
+    hint.classList.add('hidden');
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    initCropper(e.target.result);
+    document.getElementById('cropper-card').dataset.sourceType = 'file';
+  };
+  reader.readAsDataURL(file);
+}
+
+function loadPhotoFromFile(event) {
+  photoQueue = Array.from(event.target.files || []);
+  if (!photoQueue.length) return;
+  showQueuedPhoto(0);
+}
+
+function cropReset() {
+  if (cropper) cropper.reset();
+}
+
+async function photoImport() {
+  if (!cropper) { alert(T.loadImageFirst); return; }
+
+  // Crop coordinates for the fixed 4:3 frame (rounded). If the frame extends
+  // past the image (letterbox after zooming out), the server clamps the box to
+  // the image bounds, so the whole photo is exported and the device centres it.
+  const cropData = cropper.getData(true);
+  const photoTitle = document.getElementById('photo-title').value.trim() || null;
+  const playlistTitle = document.getElementById('photo-playlist-title').value.trim() || DEFAULT_TITLE.photos;
+  const profileIds = checkedValues('photo_profile_ids');
+  const card = document.getElementById('cropper-card');
+  const sourceType = card.dataset.sourceType;
+
+  const spinner = document.getElementById('photo-spinner');
+  const result = document.getElementById('photo-result');
+  spinner.classList.remove('hidden');
+  result.classList.add('hidden');
+
+  try {
+    let resp, data;
+    if (sourceType === 'url') {
+      // For URL-based: use ingest endpoint with crop coords
+      const url = card.dataset.sourceUrl;
+      resp = await fetch('/api/v1/media/ingest', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          source_url: url,
+          media_type: 'photo',
+          playlist_title: playlistTitle,
+          profile_ids: profileIds,
+          crop_x: cropData.x,
+          crop_y: cropData.y,
+          crop_width: cropData.width,
+          crop_height: cropData.height,
+          title_override: photoTitle,
+        }),
+      });
+    } else {
+      // File upload: use multipart form (file input or clipboard paste)
+      const fileToUpload = photoQueue[photoQueueIndex] || pastedImageBlob;
+      if (!fileToUpload) { alert(T.noImage); spinner.classList.add('hidden'); return; }
+      const formData = new FormData();
+      formData.append('file', fileToUpload);
+      formData.append('media_type', 'photo');
+      formData.append('playlist_title', playlistTitle);
+      profileIds.forEach(id => formData.append('profile_ids', id));
+      formData.append('crop_x', cropData.x);
+      formData.append('crop_y', cropData.y);
+      formData.append('crop_width', cropData.width);
+      formData.append('crop_height', cropData.height);
+      if (photoTitle) formData.append('title_override', photoTitle);
+      resp = await fetch('/api/v1/media/upload', {method: 'POST', body: formData});
+    }
+    data = await resp.json();
+    spinner.classList.add('hidden');
+    if (resp.ok && (data.successful || data.skipped)) {
+      if (data.successful) setStatus(result, '✓ ' + T.photoImported, 'success');
+      else setStatus(result, T.photoDuplicate, 'info');
+      // More photos picked: bring up the next one, keeping title-less
+      // defaults (playlist and profiles) so a whole roll goes in quickly.
+      if (sourceType === 'file' && photoQueueIndex + 1 < photoQueue.length) {
+        document.getElementById('photo-title').value = '';
+        showQueuedPhoto(photoQueueIndex + 1);
+        card.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+    } else {
+      setStatus(result, fmt(T.importFailed, {detail: apiDetail(data, JSON.stringify(data))}), 'error');
+    }
+  } catch(e) {
+    spinner.classList.add('hidden');
+    setStatus(result, fmt(T.networkError, {error: e}), 'error');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Quick Import — smart paste
+// ---------------------------------------------------------------------------
+let pastedImageBlob = null;
+
+// Ask the server which importer handles the URL; true when it can preview
+// (only importers that implement previews, such as the yt-dlp plugin).
+async function smartIsPreviewable(url) {
+  if (!document.getElementById('tab-youtube')) return false;
+  try {
+    const resp = await fetch('/api/v1/importers/match?source=' + encodeURIComponent(url));
+    if (!resp.ok) return false;
+    const info = await resp.json();
+    return !!info.supports_preview;
+  } catch (e) {
+    return false;
+  }
+}
+
+function smartIsImageUrl(url) {
+  return /\.(jpg|jpeg|png|gif|webp|bmp|avif|svg)(\?.*)?$/i.test(url);
+}
+
+async function smartGo() {
+  const url = document.getElementById('smart-input').value.trim();
+  if (!url) return;
+  const status = document.getElementById('smart-status');
+  status.classList.add('hidden');
+
+  if (await smartIsPreviewable(url)) {
+    document.getElementById('yt-url').value = url;
+    showTab('import-tabs', 'tab-youtube');
+    ytPreview();
+  } else if (smartIsImageUrl(url)) {
+    document.getElementById('photo-url-input').value = url;
+    showTab('import-tabs', 'tab-photo');
+    showTab('photo-src-tabs', 'photo-from-url');
+    loadPhotoFromUrl();
+  } else {
+    setStatus(status, T.couldNotDetect, 'error');
+  }
+}
+
+// Global paste listener: capture clipboard images when Quick Import tab is active.
+document.addEventListener('paste', function(e) {
+  const smartTab = document.getElementById('tab-smart');
+  if (!smartTab || !smartTab.classList.contains('active')) return;
+
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const blob = item.getAsFile();
+      pastedImageBlob = blob;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        showTab('import-tabs', 'tab-photo');
+        showTab('photo-src-tabs', 'photo-from-file');
+        initCropper(evt.target.result);
+        document.getElementById('cropper-card').dataset.sourceType = 'file';
+      };
+      reader.readAsDataURL(blob);
+      return;
+    }
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Archive upload import
+// ---------------------------------------------------------------------------
+function arcFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const hint = document.getElementById('arc-file-hint');
+  hint.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+  hint.style.display = 'block';
+  // Pre-fill fallback playlist from filename stem if field is empty.
+  const playlistInput = document.getElementById('arc-playlist-title');
+  if (!playlistInput.value.trim()) {
+    playlistInput.value = file.name.replace(/\.(zip|tar\.gz|tgz|tar\.bz2|tar\.xz|tar)$/i, '');
+  }
+}
+
+async function archiveImport() {
+  const fileInput = document.getElementById('arc-file');
+  if (!fileInput.files || !fileInput.files.length) {
+    alert(T.selectArchive);
+    return;
+  }
+  const file = fileInput.files[0];
+  const mediaType = document.getElementById('arc-media-type').value;
+  const playlistTitle = document.getElementById('arc-playlist-title').value.trim();
+  const profileIds = checkedValues('arc_profile_ids');
+
+  const spinner = document.getElementById('arc-spinner');
+  const result = document.getElementById('arc-result');
+  const progressWrap = document.getElementById('arc-progress-wrap');
+  const progressBar = document.getElementById('arc-progress-bar');
+  const submitBtn = document.getElementById('arc-submit-btn');
+
+  spinner.classList.remove('hidden');
+  result.classList.add('hidden');
+  submitBtn.disabled = true;
+  progressWrap.classList.remove('hidden');
+  progressBar.style.width = '0%';
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('media_type', mediaType);
+  if (playlistTitle) formData.append('playlist_title', playlistTitle);
+  profileIds.forEach(id => formData.append('profile_ids', id));
+
+  // Track upload progress via XHR so we can show a progress bar.
+  try {
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/v1/media/upload-archive');
+      xhr.setRequestHeader(
+        'X-CSRF-Token', document.querySelector('meta[name="csrf-token"]').content);
+      xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+          progressBar.style.width = Math.round(e.loaded / e.total * 90) + '%';
+        }
+      });
+      xhr.addEventListener('load', () => {
+        progressBar.style.width = '100%';
+        try {
+          resolve({status: xhr.status, body: JSON.parse(xhr.responseText)});
+        } catch(e) {
+          reject(new Error(T.invalidJson));
+        }
+      });
+      xhr.addEventListener('error', () => reject(new Error(T.networkErrorPlain)));
+      xhr.send(formData);
+    });
+
+    spinner.classList.add('hidden');
+    submitBtn.disabled = false;
+    progressWrap.classList.add('hidden');
+
+    if (data.status >= 200 && data.status < 300) {
+      const d = data.body;
+      const msg = '\u2713 ' + fmt(T.importDone, {
+        total: d.total_files, imported: d.successful, skipped: d.skipped, failed: d.failed});
+      setStatus(result, msg, d.failed > 0 ? 'error' : 'success');
+    } else {
+      setStatus(result, fmt(T.errorPlain, {detail: apiDetail(data.body, T.uploadFailed)}), 'error');
+    }
+  } catch(e) {
+    spinner.classList.add('hidden');
+    submitBtn.disabled = false;
+    progressWrap.classList.add('hidden');
+    setStatus(result, fmt(T.networkError, {error: e}), 'error');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Bulk filesystem import
+// ---------------------------------------------------------------------------
+async function bulkImport() {
+  const path = document.getElementById('bulk-path').value.trim();
+  const mediaType = document.getElementById('bulk-media-type').value;
+  const playlistTitle = document.getElementById('bulk-playlist-title').value.trim() || path.split('/').pop() || DEFAULT_TITLE.import;
+  const profileIds = checkedValues('bulk_profile_ids');
+
+  if (!path) { alert(T.enterPath); return; }
+
+  const spinner = document.getElementById('bulk-spinner');
+  const result = document.getElementById('bulk-result');
+  spinner.classList.remove('hidden');
+  result.classList.add('hidden');
+
+  try {
+    const resp = await fetch('/api/v1/media/ingest', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        source_path: path,
+        media_type: mediaType,
+        playlist_title: playlistTitle,
+        profile_ids: profileIds,
+      }),
+    });
+    const data = await resp.json();
+    spinner.classList.add('hidden');
+    if (resp.ok) {
+      setStatus(result,
+        '✓ ' + fmt(T.importDone, {
+          total: data.total_files, imported: data.successful,
+          skipped: data.skipped, failed: data.failed}),
+        data.failed > 0 ? 'error' : 'success');
+    } else {
+      setStatus(result, fmt(T.errorPlain, {detail: apiDetail(data, resp.statusText)}), 'error');
+    }
+  } catch(e) {
+    spinner.classList.add('hidden');
+    setStatus(result, fmt(T.networkError, {error: e}), 'error');
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,241 @@
+# Translations for kidsplay_device.
+# Copyright (C) KidsPlay contributors
+# This file is distributed under the same license as the KidsPlay project.
+msgid ""
+msgstr ""
+"Project-Id-Version: kidsplay_device 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/anthonytw/kidsplay/issues\n"
+"POT-Creation-Date: 2026-01-01 00:00+0000\n"
+"PO-Revision-Date: 2026-01-01 00:00+0000\n"
+"Last-Translator: KidsPlay contributors\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: pairing_screen.py
+msgid "All set! Starting…"
+msgstr ""
+
+#: views.py
+msgid "Audiobooks"
+msgstr ""
+
+#: pairing_screen.py views.py
+msgid "Back"
+msgstr ""
+
+#: views.py
+msgid "Bedtime"
+msgstr ""
+
+#: views.py
+msgid "Blue"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Change server"
+msgstr ""
+
+#: views.py
+msgid "Change theme"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Choose"
+msgstr ""
+
+#: views.py
+msgid "Color Theme"
+msgstr ""
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Connecting to {url}…"
+msgstr ""
+
+#: views.py
+msgid "Contrast"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Couldn't reach the server."
+msgstr ""
+
+#: pairing_screen.py
+msgid "Couldn't save the settings on this player."
+msgstr ""
+
+#: views.py
+msgid "Cyan"
+msgstr ""
+
+#: keyboard.py
+msgid "Del"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Delete"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Done"
+msgstr ""
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Expires in {time}"
+msgstr ""
+
+#: views.py
+msgid "Green"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Keys"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Looking for a server on your network…"
+msgstr ""
+
+#: views.py
+msgid "Music"
+msgstr ""
+
+#: views.py
+msgid "Night"
+msgstr ""
+
+#: views.py
+msgid "Nothing playing"
+msgstr ""
+
+#: keyboard.py
+msgid "OK"
+msgstr ""
+
+#: views.py
+msgid "Orange"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Pairing is turned off on the server."
+msgstr ""
+
+#: views.py
+msgid "Photos"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Pick only a server you recognize. Anyone on the network can announce one."
+msgstr ""
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Preset: {address}"
+msgstr ""
+
+#: views.py
+msgid "Purple"
+msgstr ""
+
+#: views.py
+msgid "Red"
+msgstr ""
+
+#: views.py
+msgid "Repeat All"
+msgstr ""
+
+#: views.py
+msgid "Repeat One"
+msgstr ""
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Scan the picture with a phone, or open {url} and type this code."
+msgstr ""
+
+#: pairing_screen.py
+#, python-brace-format
+msgid "Server ID: {id}. The approval page shows the same ID."
+msgstr ""
+
+#: pairing_screen.py
+msgid "Server address"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Set up this player"
+msgstr ""
+
+#: views.py
+msgid "Settings"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Something went wrong."
+msgstr ""
+
+#: pairing_screen.py
+msgid "That doesn't look like an address."
+msgstr ""
+
+#: pairing_screen.py
+msgid "That isn't the server you chose. Check the address."
+msgstr ""
+
+#: pairing_screen.py
+msgid "The request was declined."
+msgstr ""
+
+#: pairing_screen.py
+msgid "The server is busy. Try again in a minute."
+msgstr ""
+
+#: views.py
+msgid "Theme chosen by your parents"
+msgstr ""
+
+#: pairing_screen.py
+msgid "This code has expired."
+msgstr ""
+
+#: pairing_screen.py
+msgid "This code was already used."
+msgstr ""
+
+#: pairing_screen.py
+msgid "Try again"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Type"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Type the address…"
+msgstr ""
+
+#: views.py
+msgid "Unknown server. Ask a grown-up."
+msgstr ""
+
+#: views.py
+#, python-brace-format
+msgid "Until 01:{minute}"
+msgid_plural "Until {hour}:{minute}"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app.py
+#, python-brace-format
+msgid "Volume {percent}%"
+msgstr ""
+
+#: pairing_screen.py
+msgid "Which KidsPlay server should it connect to?"
+msgstr ""
+
