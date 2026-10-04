@@ -230,9 +230,9 @@ The server can import audio from YouTube URLs using
 `kidsplay-importer-ytdlp` plugin. The Docker image includes it by default; see
 [docs/IMPORTERS.md](docs/IMPORTERS.md) to leave it out or to write an importer
 for another source. Only import content you have the right to download, and
-check the terms of the site you are downloading from. The importer extracts only
-the thumbnail and audio. Playlists are supported as well, there is a built-in
-queuing system.
+check the terms of the site you are downloading from. The importer keeps only
+the audio and the thumbnail. Playlists are supported too, through the built-in
+import queue.
 
 ## License
 
