@@ -16,6 +16,14 @@ pygame-ce app and runs on any Linux box or desktop.
 > **Status:** early and opinionated. It runs one family's devices every day,
 > and is being generalized for other people's setups. Expect rough edges.
 
+## Disclaimer
+
+This software was completely generated using Claude Code. I provided design guidance and
+the set of requirements. It grew out of an older version I co-developed with a much less
+capable Claude.
+
+My kids use it almost daily and love it. :-)
+
 ## Try it in 2 minutes
 
 You need [uv](https://docs.astral.sh/uv/) and `ffmpeg`. On a Mac or Linux box:
@@ -222,7 +230,9 @@ The server can import audio from YouTube URLs using
 `kidsplay-importer-ytdlp` plugin. The Docker image includes it by default; see
 [docs/IMPORTERS.md](docs/IMPORTERS.md) to leave it out or to write an importer
 for another source. Only import content you have the right to download, and
-check the terms of the site you are downloading from.
+check the terms of the site you are downloading from. The importer extracts only
+the thumbnail and audio. Playlists are supported as well, there is a built-in
+queuing system.
 
 ## License
 
